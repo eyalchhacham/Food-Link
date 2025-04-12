@@ -15,7 +15,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,11 +27,7 @@ export default function Login() {
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
-      }
-
-      // Store the token in localStorage
-      localStorage.setItem('token', data.token);
-      
+      }      
       // Redirect to dashboard or home page
       navigate('/');
     } catch (err) {

@@ -25,6 +25,24 @@ app.post("/users", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
+  } catch (err) {
+    console.error("Error during login:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 // Example: Get all users
 app.get("/users", async (req, res) => {
   const users = await prisma.user.findMany();
