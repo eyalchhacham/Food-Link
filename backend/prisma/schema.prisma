@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  password  String
+  email String @unique
+}
+
+model FoodDonation {
+  id                   Int                  @id @default(autoincrement())
+  title                String
+  description          String
+  image_url            String? // Optional
+  quantity             Float
+  unit                 Unit                 @default(servings)
+  expiry_date          DateTime
+  pickup_address       String
+  latitude             Float? // Optional
+  longitude            Float? // Optional
+  pickup_instructions  String? // Optional
+  category             Category
+  dietary_restrictions DietaryRestriction[]
+  allergens            Allergen[]
+  status               DonationStatus       @default(available)
+  claimed_by           String? // Email
+  dietary_notes        String? // Optional
+  temperature          Temperature?
+
+  @@map("food_donations") // optional: for custom table name
+}
+
+enum Unit {
+  servings
+  pounds
+  boxes
+  items
+}
+
+enum Category {
+  prepared_meals
+  fresh_produce
+  canned_goods
+  bakery
+  dairy
+  meat
+  other
+}
+
+enum DietaryRestriction {
+  vegetarian
+  vegan
+  gluten_free
+  nut_free
+  dairy_free
+  kosher
+  halal
+  none
+}
+
+enum Allergen {
+  peanuts
+  tree_nuts
+  milk
+  eggs
+  fish
+  shellfish
+  soy
+  wheat
+  none
+}
+
+enum DonationStatus {
+  available
+  claimed
+  completed
+}
+
+enum Temperature {
+  frozen
+  refrigerated
+  room_temperature
+}
