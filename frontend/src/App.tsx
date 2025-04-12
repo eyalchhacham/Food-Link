@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Heart, Utensils, Search, MessageCircle } from 'lucide-react';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import UploadFood from './pages/UploadFood';
 
-function HomePage() {
+function HomePage({ user, onLogout }: { user: { name: string; email: string } | null; onLogout: () => void }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      {/* Hero Section */}
       <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
@@ -16,21 +15,36 @@ function HomePage() {
               <Heart className="w-8 h-8 text-emerald-600" />
               <span className="text-2xl font-bold text-gray-900">FoodLink</span>
             </div>
-            <div className="flex space-x-4">
-              <Link to="/login" className="px-4 py-2 text-gray-600 hover:text-gray-900">
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-              >
-                Sign Up
-              </Link>
+            <div className="flex space-x-4 items-center">
+              {user ? (
+                <>
+                  <span className="text-gray-600">
+                    Welcome, {user.name !== user.email ? user.name : ''} {user.email}
+                  </span>
+                  <button
+                    onClick={onLogout}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="px-4 py-2 text-gray-600 hover:text-gray-900">
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </nav>
       </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -48,7 +62,7 @@ function HomePage() {
               <Utensils className="w-6 h-6 text-emerald-600" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Donate Food</h3>
-            <p className="text-gray-600">Share your surplus food with those who need it most</p>
+            <p className="text-gray-600">Share your surplus food with those who need it most.</p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm text-center">
@@ -56,7 +70,7 @@ function HomePage() {
               <Search className="w-6 h-6 text-emerald-600" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Find Food</h3>
-            <p className="text-gray-600">Discover available food donations in your area</p>
+            <p className="text-gray-600">Discover available food donations in your area.</p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm text-center">
@@ -64,7 +78,7 @@ function HomePage() {
               <MessageCircle className="w-6 h-6 text-emerald-600" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Connect</h3>
-            <p className="text-gray-600">Coordinate pickups through our secure messaging system</p>
+            <p className="text-gray-600">Coordinate pickups through our secure messaging system.</p>
           </div>
         </div>
 
@@ -77,10 +91,10 @@ function HomePage() {
                 we can reduce food waste while helping those in need.
               </p>
               <Link
-                to="/signup"
+                to="/upload-food"
                 className="inline-block px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
               >
-                Get Started
+                Upload Food
               </Link>
             </div>
             <div className="md:w-1/2">
@@ -104,13 +118,27 @@ function HomePage() {
     </div>
   );
 }
-
 function App() {
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+
+  const handleLogout = () => {
+    setUser(null); // איפוס מצב המשתמש
+  };
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<HomePage user={user} onLogout={handleLogout} />} />
+        <Route
+          path="/login"
+          element={
+            <Login
+              setUser={(userData: { name: string; email: string }) => {
+                setUser(userData); // עדכון מצב המשתמש עם שם ואימייל
+              }}
+            />
+          }
+        />
         <Route path="/signup" element={<Signup />} />
         <Route path="/upload-food" element={<UploadFood />} />
       </Routes>

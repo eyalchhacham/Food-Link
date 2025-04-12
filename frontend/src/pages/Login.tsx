@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
-export default function Login() {
+export default function Login({ setUser }: { setUser: (user: { name: string; email: string }) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,8 +27,12 @@ export default function Login() {
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
-      }      
-      // Redirect to dashboard or home page
+      }
+
+      // עדכון מצב המשתמש עם שם (אם קיים) ואימייל
+      setUser({ name: data.user.name || data.user.email, email: data.user.email });
+
+      // הפניה לדף הבית
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
