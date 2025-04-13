@@ -8,33 +8,32 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  password  String
-  email String @unique
-  name String
+  id          Int    @id @default(autoincrement())
+  password    String
+  email       String @unique
+  name        String
   phoneNumber String @map("phone_number")
 
+  FoodDonation FoodDonation[]
 }
 
 model FoodDonation {
-  id                   Int                  @id @default(autoincrement())
-  title                String
-  description          String
-  image_url            String? // Optional
-  quantity             Float
-  unit                 Unit                 @default(servings)
-  expiry_date          DateTime
-  pickup_address       String
-  latitude             Float? // Optional
-  longitude            Float? // Optional
-  pickup_instructions  String? // Optional
-  category             Category
-  dietary_restrictions DietaryRestriction[]
-  allergens            Allergen[]
-  status               DonationStatus       @default(available)
-  claimed_by           String? // Email
-  dietary_notes        String? // Optional
-  temperature          Temperature?
+  id             Int            @id @default(autoincrement())
+  productName    String         @map("product_name")
+  description    String
+  image_url      String? // Optional
+  amount         Float
+  expirationDate DateTime
+  pickupDate     DateTime
+  latitude       Float? // Optional
+  longitude      Float? // Optional 
+  pickupHours    String?        @map("pickup_hours")
+  category       Category
+  status         DonationStatus @default(available)
+  claimed_by     String? // Email
+  dietary_notes  String? // Optional
+  userId         Int            @map("user_id") // Foreign key to User
+  user           User           @relation(fields: [userId], references: [id]) // Relation to User
 
   @@map("food_donations") // optional: for custom table name
 }

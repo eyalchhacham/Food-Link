@@ -47,7 +47,7 @@ function App() {
             />
           }
         />
-        <Route path="/upload-food" element={<UploadFood />} />
+        <Route path="/upload-food" element={<UploadFood user={user} />} />
         <Route
           path="/my-profile"
           element={
