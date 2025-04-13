@@ -7,6 +7,7 @@ import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 
 export type User = {
+  id: string;
   email: string;
   name: string;
   phoneNumber: string;
@@ -47,7 +48,16 @@ function App() {
           }
         />
         <Route path="/upload-food" element={<UploadFood />} />
-        <Route path="/my-profile" element={<ProfilePage />} />
+        <Route
+          path="/my-profile"
+          element={
+            <ProfilePage
+              setUser={(user: User) => {
+                setUser(user);
+              }}
+            />
+          }
+        />
       </Routes>
     </Router>
   );
