@@ -38,7 +38,7 @@ export default function Signup({ setUser }: { setUser: (user: User) => void }) {
       if (!response.ok) {
         throw new Error(data.message || "Registration failed");
       }
-      setUser({ email, name, phoneNumber });
+      setUser({ email, name, phoneNumber, id: data.id });
       navigate("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
