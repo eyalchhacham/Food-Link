@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ImagePlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { ArrowLeft, ImagePlus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function UploadFood() {
-  const [productName, setProductName] = useState('');
-  const [category, setCategory] = useState('');
+  const [productName, setProductName] = useState("");
+  const [category, setCategory] = useState("");
   const [amount, setAmount] = useState(1);
-  const [description, setDescription] = useState('');
-  const [pickupDate, setPickupDate] = useState('');
-  const [pickupHours, setPickupHours] = useState('');
-  const [expirationDate, setExpirationDate] = useState('');
+  const [description, setDescription] = useState("");
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupHours, setPickupHours] = useState("");
+  const [expirationDate, setExpirationDate] = useState("");
   const [images, setImages] = useState<FileList | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // TODO: Implement form submission
       console.log({
@@ -27,10 +27,10 @@ export default function UploadFood() {
         pickupDate,
         pickupHours,
         expirationDate,
-        images
+        images,
       });
     } catch (error) {
-      console.error('Error uploading food:', error);
+      console.error("Error uploading food:", error);
     } finally {
       setIsLoading(false);
     }
@@ -47,10 +47,12 @@ export default function UploadFood() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center">
-          <Link to="/" className="text-gray-600 hover:text-gray-900">
+          <Link to="/home" className="text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-6 h-6" />
           </Link>
-          <h1 className="ml-4 text-xl font-semibold text-gray-900">Uploading My Food</h1>
+          <h1 className="ml-4 text-xl font-semibold text-gray-900">
+            Uploading My Food
+          </h1>
         </div>
       </header>
 
@@ -69,7 +71,9 @@ export default function UploadFood() {
               />
               <div className="text-center">
                 <ImagePlus className="w-8 h-8 mx-auto text-gray-400" />
-                <span className="mt-2 block text-sm text-gray-500">Add Photos</span>
+                <span className="mt-2 block text-sm text-gray-500">
+                  Add Photos
+                </span>
               </div>
             </div>
             {/* Preview will be added here when images are selected */}
@@ -78,7 +82,10 @@ export default function UploadFood() {
           {/* Form Fields */}
           <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm">
             <div>
-              <label htmlFor="productName" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="productName"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Product Name
               </label>
               <input
@@ -93,7 +100,10 @@ export default function UploadFood() {
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Category
               </label>
               <select
@@ -114,7 +124,10 @@ export default function UploadFood() {
             </div>
 
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="amount"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Amount
               </label>
               <input
@@ -129,7 +142,10 @@ export default function UploadFood() {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Description
               </label>
               <textarea
@@ -144,7 +160,10 @@ export default function UploadFood() {
             </div>
 
             <div>
-              <label htmlFor="pickupDate" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="pickupDate"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Pick up date
               </label>
               <input
@@ -158,7 +177,10 @@ export default function UploadFood() {
             </div>
 
             <div>
-              <label htmlFor="pickupHours" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="pickupHours"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Pick up hours
               </label>
               <select
@@ -176,7 +198,10 @@ export default function UploadFood() {
             </div>
 
             <div>
-              <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="expirationDate"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Expiration date
               </label>
               <input
@@ -207,7 +232,7 @@ export default function UploadFood() {
               disabled={isLoading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Uploading...' : 'Submit'}
+              {isLoading ? "Uploading..." : "Submit"}
             </button>
           </div>
         </form>

@@ -4,9 +4,16 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import UploadFood from "./pages/UploadFood";
 import { HomePage } from "./pages/HomePage";
+import { ProfilePage } from "./pages/ProfilePage";
+
+export type User = {
+  email: string;
+  name: string;
+  phoneNumber: string;
+};
 
 function App() {
-  const [user, setUser] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const handleLogout = () => {
     setUser(null);
@@ -23,8 +30,8 @@ function App() {
           path="/"
           element={
             <Login
-              setUser={(email: string) => {
-                setUser(email);
+              setUser={(user: User) => {
+                setUser(user);
               }}
             />
           }
@@ -33,13 +40,14 @@ function App() {
           path="/signup"
           element={
             <Signup
-              setUser={(email: string) => {
-                setUser(email);
+              setUser={(user: User) => {
+                setUser(user);
               }}
             />
           }
         />
         <Route path="/upload-food" element={<UploadFood />} />
+        <Route path="/my-profile" element={<ProfilePage />} />
       </Routes>
     </Router>
   );

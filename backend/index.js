@@ -14,10 +14,10 @@ app.get("/", (req, res) => {
 });
 
 app.post("/users", async (req, res) => {
-  const { email, password } = req.body;
+  const data = req.body;
   try {
     const user = await prisma.user.create({
-      data: { password, email },
+      data,
     });
     res.json(user);
   } catch (err) {
@@ -35,13 +35,15 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
+    res.json({
+      message: "Login successful",
+      user: { id: user.id, email: user.email, name: user.name, phoneNumber: user.phoneNumber },
+    });
   } catch (err) {
     console.error("Error during login:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 // Example: Get all users
 app.get("/users", async (req, res) => {
