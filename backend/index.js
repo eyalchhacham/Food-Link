@@ -8,10 +8,6 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("Hello from Express + Prisma + PostgreSQL");
-});
-
 app.post("/users", async (req, res) => {
   const data = req.body;
 
@@ -25,15 +21,15 @@ app.post("/users", async (req, res) => {
   }
 });
 app.put("/users/:id", async (req, res) => {
-  const { id } = req.params; 
-  const data = req.body; 
+  const { id } = req.params;
+  const data = req.body;
 
   try {
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) }, 
+      where: { id: parseInt(id) },
       data,
     });
-    res.json(updatedUser); 
+    res.json(updatedUser);
   } catch (err) {
     console.error("Error updating user:", err);
     res.status(500).json({ error: "Error updating user" });
@@ -63,12 +59,6 @@ app.post("/login", async (req, res) => {
     console.error("Error during login:", err);
     res.status(500).json({ error: "Internal server error" });
   }
-});
-
-// Example: Get all users
-app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
 });
 
 app.listen(3000, () => {
