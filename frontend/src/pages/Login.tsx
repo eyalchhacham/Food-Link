@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
-import { Heart } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Heart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
-export default function Login({ setUser }: { setUser: (user: { name: string; email: string }) => void }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+export default function Login({
+  setUser,
+}: {
+  setUser: (user: string) => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -26,16 +30,14 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || "Login failed");
       }
 
-      // עדכון מצב המשתמש עם שם (אם קיים) ואימייל
-      setUser({ name: data.user.name || data.user.email, email: data.user.email });
+      setUser(data.user.email);
 
-      // הפניה לדף הבית
-      navigate('/');
+      navigate("/home");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +47,7 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/home" className="flex items-center space-x-2">
             <Heart className="w-8 h-8 text-emerald-600" />
             <span className="text-2xl font-bold text-gray-900">FoodLink</span>
           </Link>
@@ -54,8 +56,11 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link to="/signup" className="font-medium text-emerald-600 hover:text-emerald-500">
+          Or{" "}
+          <Link
+            to="/signup"
+            className="font-medium text-emerald-600 hover:text-emerald-500"
+          >
             create a new account
           </Link>
         </p>
@@ -70,7 +75,10 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
           )}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -88,7 +96,10 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1">
@@ -113,13 +124,19 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
                   type="checkbox"
                   className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   Remember me
                 </label>
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
+                <a
+                  href="#"
+                  className="font-medium text-emerald-600 hover:text-emerald-500"
+                >
                   Forgot your password?
                 </a>
               </div>
@@ -131,7 +148,7 @@ export default function Login({ setUser }: { setUser: (user: { name: string; ema
                 disabled={isLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>
