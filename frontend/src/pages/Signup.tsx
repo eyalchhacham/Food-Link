@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { User } from "../App";
 
-export default function Signup({
-  setUser,
-}: {
-  setUser: (user: string) => void;
-}) {
+export default function Signup({ setUser }: { setUser: (user: User) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +30,7 @@ export default function Signup({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name, phoneNumber }),
       });
 
       const data = await response.json();
@@ -39,7 +38,7 @@ export default function Signup({
       if (!response.ok) {
         throw new Error(data.message || "Registration failed");
       }
-      setUser(email);
+      setUser({ email, name, phoneNumber });
       navigate("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -93,6 +92,48 @@ export default function Signup({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="name"
+                  name="name"
+                  type="name"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="phoneNumber"
+                className="block text-sm font-medium text-gray-700"
+              >
+                phoneNumber
+              </label>
+              <div className="mt-1">
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="phoneNumber"
+                  autoComplete="phoneNumber"
+                  required
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>

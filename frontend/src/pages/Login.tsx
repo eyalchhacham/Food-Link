@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { User } from "../App";
 
-export default function Login({
-  setUser,
-}: {
-  setUser: (user: string) => void;
-}) {
+export default function Login({ setUser }: { setUser: (user: User) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,8 +29,7 @@ export default function Login({
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
-
-      setUser(data.user.email);
+      setUser(data.user);
 
       navigate("/home");
     } catch (err) {

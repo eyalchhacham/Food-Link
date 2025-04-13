@@ -1,11 +1,12 @@
-import { Heart, Utensils, Search, MessageCircle } from "lucide-react";
+import { Heart, Utensils, Search, MessageCircle, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { User as Usertype } from "../App";
 
 export function HomePage({
   user,
   onLogout,
 }: {
-  user: string | null;
+  user: Usertype | null;
   onLogout: () => void;
 }) {
   const navigate = useNavigate();
@@ -17,11 +18,19 @@ export function HomePage({
             <div className="flex items-center space-x-2">
               <Heart className="w-8 h-8 text-emerald-600" />
               <span className="text-2xl font-bold text-gray-900">FoodLink</span>
+              <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                <User
+                  onClick={() => {
+                    navigate(`/my-profile`, { state: { user } });
+                  }}
+                  className="w-6 h-6 text-gray-600"
+                />
+              </div>
             </div>
             <div className="flex space-x-4 items-center">
               {user ? (
                 <>
-                  <span className="text-gray-600">Welcome, {user}</span>
+                  <span className="text-gray-600">Welcome, {user.name}</span>
                   <button
                     onClick={() => {
                       navigate("/");
