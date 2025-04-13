@@ -52,10 +52,8 @@ export default function Signup({
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <Heart className="w-8 h-8 text-emerald-600" />
-            <span className="text-2xl font-bold text-gray-900">FoodLink</span>
-          </Link>
+          <Heart className="w-8 h-8 text-emerald-600" />
+          <span className="text-2xl font-bold text-gray-900">FoodLink</span>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account

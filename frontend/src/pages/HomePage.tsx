@@ -1,5 +1,5 @@
 import { Heart, Utensils, Search, MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function HomePage({
   user,
@@ -8,6 +8,7 @@ export function HomePage({
   user: string | null;
   onLogout: () => void;
 }) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
       <header className="bg-white shadow-sm">
@@ -22,7 +23,10 @@ export function HomePage({
                 <>
                   <span className="text-gray-600">Welcome, {user}</span>
                   <button
-                    onClick={onLogout}
+                    onClick={() => {
+                      navigate("/");
+                      onLogout();
+                    }}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                   >
                     Logout
@@ -31,7 +35,7 @@ export function HomePage({
               ) : (
                 <>
                   <Link
-                    to="/login"
+                    to="/"
                     className="px-4 py-2 text-gray-600 hover:text-gray-900"
                   >
                     Login
