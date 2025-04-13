@@ -1,36 +1,62 @@
 import React, { useState } from "react";
 import { ArrowLeft, ImagePlus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { User } from "../App";
 
-export default function UploadFood() {
+enum Category {
+  prepared_meals,
+  fresh_produce,
+  canned_goods,
+  bakery,
+  dairy,
+  meat,
+  other,
+}
+
+export default function UploadFood({ user }: { user: User | null }) {
+  const navigate = useNavigate();
+
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState(1);
   const [description, setDescription] = useState("");
-  const [pickupDate, setPickupDate] = useState("");
+  const [pickupDate, setPickupDate] = useState<Date | undefined>();
   const [pickupHours, setPickupHours] = useState("");
-  const [expirationDate, setExpirationDate] = useState("");
+  const [expirationDate, setExpirationDate] = useState<Date | undefined>();
   const [images, setImages] = useState<FileList | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    setError("");
     try {
-      // TODO: Implement form submission
-      console.log({
-        productName,
-        category,
-        amount,
-        description,
-        pickupDate,
-        pickupHours,
-        expirationDate,
-        images,
+      const response = await fetch("http://localhost:3000/food-donation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productName,
+          category,
+          amount,
+          description,
+          pickupDate,
+          pickupHours,
+          expirationDate,
+          userId: user ? user.id : null,
+        }),
       });
-    } catch (error) {
-      console.error("Error uploading food:", error);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "food donation failed");
+      }
+      navigate("/home");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -58,6 +84,11 @@ export default function UploadFood() {
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-8">
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Image Upload Section */}
           <div className="grid grid-cols-2 gap-4">
@@ -114,12 +145,13 @@ export default function UploadFood() {
                 required
               >
                 <option value="">Select a category</option>
-                <option value="fruits">Fruits</option>
-                <option value="vegetables">Vegetables</option>
-                <option value="dairy">Dairy</option>
-                <option value="grains">Grains</option>
-                <option value="protein">Protein</option>
-                <option value="other">Other</option>
+                {Object.keys(Category)
+                  .filter((key) => isNaN(Number(key)))
+                  .map((key) => (
+                    <option key={key} value={key}>
+                      {key.replace(/_/g, " ")}{" "}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -169,8 +201,8 @@ export default function UploadFood() {
               <input
                 type="date"
                 id="pickupDate"
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
+                value={pickupDate ? pickupDate.toISOString().split("T")[0] : ""}
+                onChange={(e) => setPickupDate(new Date(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                 required
               />
@@ -207,8 +239,12 @@ export default function UploadFood() {
               <input
                 type="date"
                 id="expirationDate"
-                value={expirationDate}
-                onChange={(e) => setExpirationDate(e.target.value)}
+                value={
+                  expirationDate
+                    ? expirationDate.toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) => setExpirationDate(new Date(e.target.value))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                 required
               />

@@ -61,6 +61,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/food-donation", async (req, res) => {
+  const data = req.body;
+
+  try {
+    const foodDonation = await prisma.foodDonation.create({
+      data,
+    });
+    res.json(foodDonation);
+  } catch (err) {
+    console.log(err);
+    
+    res.status(500).json({ error: "Error creating foodDonation" });
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
