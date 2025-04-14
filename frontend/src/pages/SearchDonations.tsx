@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Home, Search, MessageCircle, User } from "lucide-react";
+import { Home, Search, MessageCircle, User, ArrowLeft } from "lucide-react"; // Import ArrowLeft
 import { CategoryChip } from "../components/CategoryChip";
 import { SearchBar } from "../components/SearchBar";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const categories = [
   "prepared_meals",
@@ -18,6 +19,7 @@ export default function SearchDonation() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     // Fetch donations from the backend
@@ -54,8 +56,19 @@ export default function SearchDonation() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Header with Back Button and Title Centered */}
+      <div className="flex items-center justify-center px-4 py-4">
+        <button
+          onClick={() => navigate(-1)} // Navigate back
+          className="p-2 bg-white rounded-full shadow-md mr-2"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-700" />
+        </button>
+        <h1 className="text-xl font-bold">Search Donations</h1>
+      </div>
+
       {/* Main Content */}
-      <div className="max-w-md mx-auto px-4 pt-8 pb-20">
+      <div className="max-w-md mx-auto px-4 pt-4 pb-20">
         {/* Search Bar */}
         <div className="mb-6">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
@@ -81,7 +94,8 @@ export default function SearchDonation() {
             donations.map((donation) => (
               <div
                 key={donation.id}
-                className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm"
+                className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm cursor-pointer"
+                onClick={() => navigate(`/donation-details/${donation.id}`)} // Navigate to DonationDetails
               >
                 <img
                   src={donation.image_url || "https://via.placeholder.com/150"}
