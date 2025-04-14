@@ -73,7 +73,12 @@ export function HomePage({
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-white p-6 rounded-xl shadow-sm text-center">
+          <div
+            onClick={() => {
+              navigate("/upload-food");
+            }}
+            className="bg-white p-6 rounded-xl shadow-sm text-center"
+          >
             <div className="inline-block p-3 bg-emerald-100 rounded-full mb-4">
               <Utensils className="w-6 h-6 text-emerald-600" />
             </div>
@@ -83,7 +88,12 @@ export function HomePage({
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm text-center">
+          <div
+            onClick={() => {
+              navigate("/search-donation");
+            }}
+            className="bg-white p-6 rounded-xl shadow-sm text-center"
+          >
             <div className="inline-block p-3 bg-emerald-100 rounded-full mb-4">
               <Search className="w-6 h-6 text-emerald-600" />
             </div>
@@ -114,12 +124,6 @@ export function HomePage({
                 Join our growing community of food donors and recipients.
                 Together, we can reduce food waste while helping those in need.
               </p>
-              <Link
-                to="/upload-food"
-                className="inline-block px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-              >
-                create donations
-              </Link>
             </div>
             <div className="md:w-1/2">
               <img
