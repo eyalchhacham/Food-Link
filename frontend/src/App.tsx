@@ -6,6 +6,8 @@ import UploadFood from "./pages/UploadFood";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import SearchDonation from "./pages/SearchDonations";
+import DonationDetails from "./pages/DonationDetails";  
+
 
 export type User = {
   id: string;
@@ -49,6 +51,7 @@ function App() {
           }
         />
         <Route path="/search-donation" element={<SearchDonation />} />
+        <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/upload-food" element={<UploadFood user={user} />} />
         <Route
           path="/my-profile"

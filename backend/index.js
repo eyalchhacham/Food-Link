@@ -122,6 +122,25 @@ app.get("/food-donations", async (req, res) => {
   }
 });
 
+app.get("/food-donations/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const donation = await prisma.foodDonation.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!donation) {
+      return res.status(404).json({ error: "Donation not found" });
+    }
+
+    res.json(donation);
+  } catch (err) {
+    console.error("Error fetching donation:", err);
+    res.status(500).json({ error: "Error fetching donation" });
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
