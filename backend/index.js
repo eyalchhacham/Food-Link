@@ -71,8 +71,54 @@ app.post("/food-donation", async (req, res) => {
     res.json(foodDonation);
   } catch (err) {
     console.log(err);
-    
+
     res.status(500).json({ error: "Error creating foodDonation" });
+  }
+});
+
+app.get("/food-donations", async (req, res) => {
+  const { searchQuery, category } = req.query;
+
+  const categoriesArray = category
+    ? category.includes(",")
+      ? category.split(",").map((cat) => cat.trim())
+      : [category]
+    : [];
+
+  if (categoriesArray.length == 0 && !searchQuery) {
+    return res.json([]);
+  }
+  try {
+    const donations = await prisma.foodDonation.findMany({
+      where: {
+        AND: [
+          searchQuery
+            ? {
+                OR: [
+                  {
+                    productName: { contains: searchQuery, mode: "insensitive" },
+                  },
+                  {
+                    description: { contains: searchQuery, mode: "insensitive" },
+                  },
+                ],
+              }
+            : {},
+          categoriesArray.length > 0
+            ? {
+                category: {
+                  in: categoriesArray,
+                },
+              }
+            : {},
+        ],
+      },
+    });
+
+    res.json(donations);
+  } catch (err) {
+    console.error("Error fetching food donations:", err);
+    res.status(500).json({ error: "Error fetching food donations" });
   }
 });
 
