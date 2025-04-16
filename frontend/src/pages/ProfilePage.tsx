@@ -1,7 +1,7 @@
 import { ChevronLeft, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { User } from "../App";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   const navigate = useNavigate();
@@ -12,6 +12,26 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || "");
   const [message, setMessage] = useState("");
   const [newName, setNewName] = useState(null);
+
+  // State for user location
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number }>({
+    lat: 32.0853, // Default latitude (Tel Aviv)
+    lng: 34.7818, // Default longitude (Tel Aviv)
+  });
+
+  // Fetch user's location
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+      },
+      (error) => {
+        console.error("Error fetching location:", error);
+        // Keep the default location if geolocation fails
+      }
+    );
+  }, []);
 
   const handleSaveChanges = async () => {
     if (!user) return;
@@ -127,7 +147,11 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
                     width="100%"
                     height="100%"
                     frameBorder="0"
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=34.77,32.07,34.78,32.08&layer=mapnik"
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+                      userLocation.lng - 0.01
+                    },${userLocation.lat - 0.01},${userLocation.lng + 0.01},${
+                      userLocation.lat + 0.01
+                    }&layer=mapnik`}
                     className="filter grayscale"
                   ></iframe>
                 </div>
