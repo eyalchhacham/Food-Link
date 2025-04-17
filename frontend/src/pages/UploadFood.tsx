@@ -106,7 +106,6 @@ export default function UploadFood({ user }: { user: User | null }) {
                 onChange={handleImageChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-<<<<<<< HEAD
               {imagePreviews.length === 0 ? (
                 <div className="text-center">
                   <ImagePlus className="w-8 h-8 mx-auto text-gray-400" />
@@ -123,14 +122,6 @@ export default function UploadFood({ user }: { user: User | null }) {
                   />
                 </div>
               )}
-=======
-              <div className="text-center">
-                <ImagePlus className="w-8 h-8 mx-auto text-gray-400" />
-                <span className="mt-2 block text-sm text-gray-500">
-                  Add Photos
-                </span>
-              </div>
->>>>>>> 326d311c17676c3dd07e4f6bef496322ba188e72
             </div>
           </div>
 
@@ -275,7 +266,7 @@ export default function UploadFood({ user }: { user: User | null }) {
             </div>
           </div>
 
-          {/*  Submit Button */}
+          {/* Submit Button */}
           <div>
             <button
               type="submit"
