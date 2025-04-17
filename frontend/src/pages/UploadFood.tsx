@@ -24,6 +24,7 @@ export default function UploadFood({ user }: { user: User | null }) {
   const [pickupHours, setPickupHours] = useState("");
   const [expirationDate, setExpirationDate] = useState<Date | undefined>();
   const [images, setImages] = useState<FileList | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // State for image previews
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -65,6 +66,11 @@ export default function UploadFood({ user }: { user: User | null }) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImages(e.target.files);
+
+      // Generate image previews
+      const fileArray = Array.from(e.target.files);
+      const previewUrls = fileArray.map((file) => URL.createObjectURL(file));
+      setImagePreviews(previewUrls);
     }
   };
 
@@ -100,14 +106,23 @@ export default function UploadFood({ user }: { user: User | null }) {
                 onChange={handleImageChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <div className="text-center">
-                <ImagePlus className="w-8 h-8 mx-auto text-gray-400" />
-                <span className="mt-2 block text-sm text-gray-500">
-                  Add Photos
-                </span>
-              </div>
+              {imagePreviews.length === 0 ? (
+                <div className="text-center">
+                  <ImagePlus className="w-8 h-8 mx-auto text-gray-400" />
+                  <span className="mt-2 block text-sm text-gray-500">
+                    Add Photos
+                  </span>
+                </div>
+              ) : (
+                <div className="absolute inset-0 overflow-hidden rounded-lg">
+                  <img
+                    src={imagePreviews[0]} // Show the first preview
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </div>
-            {/* Preview will be added here when images are selected */}
           </div>
 
           {/* Form Fields */}
@@ -248,16 +263,6 @@ export default function UploadFood({ user }: { user: User | null }) {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Your location
-              </label>
-              <div className="mt-1 aspect-video bg-gray-100 rounded-lg">
-                {/* Map component will be added here */}
-                <div className="w-full h-full bg-gray-200 rounded-lg"></div>
-              </div>
             </div>
           </div>
 
