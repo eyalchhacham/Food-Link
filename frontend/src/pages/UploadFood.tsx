@@ -266,7 +266,7 @@ export default function UploadFood({ user }: { user: User | null }) {
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/*   Submit Button */}
           <div>
             <button
               type="submit"
