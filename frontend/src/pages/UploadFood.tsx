@@ -32,28 +32,32 @@ export default function UploadFood({ user }: { user: User | null }) {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
     try {
+      const formData = new FormData();
+      formData.append("productName", productName);
+      formData.append("category", category);
+      formData.append("amount", amount.toString());
+      formData.append("description", description);
+      if (pickupDate) formData.append("pickupDate", pickupDate.toISOString());
+      formData.append("pickupHours", pickupHours);
+      if (expirationDate) formData.append("expirationDate", expirationDate.toISOString());
+      formData.append("userId", user ? user.id.toString() : "");
+
+      // Append the first image file (if any) to the form data
+      if (images && images.length > 0) {
+        formData.append("image", images[0]); // Only sending the first image
+      }
+
       const response = await fetch("http://localhost:3000/food-donation", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productName,
-          category,
-          amount,
-          description,
-          pickupDate,
-          pickupHours,
-          expirationDate,
-          userId: user ? user.id : null,
-        }),
+        body: formData, // Send form data with the image
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "food donation failed");
+        throw new Error(data.message || "Food donation failed");
       }
       navigate("/home");
     } catch (err) {

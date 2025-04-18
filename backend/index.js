@@ -1,12 +1,27 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
-
+const multer = require("multer");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+require("dotenv").config();
 const app = express();
 const prisma = new PrismaClient();
+const { Storage } = require("@google-cloud/storage");
+const storage = new Storage({
+  keyFilename: "./googleCloudStorage.json",
+});
+// Assumes GOOGLE_APPLICATION_CREDENTIALS is set
+const bucketName = "foodlink-uploads"; // Replace with your Google Cloud Storage bucket name
 
 app.use(express.json());
 app.use(cors());
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
 
 app.post("/users", async (req, res) => {
   const data = req.body;
@@ -20,6 +35,7 @@ app.post("/users", async (req, res) => {
     res.status(500).json({ error: "Error creating user" });
   }
 });
+
 app.put("/users/:id", async (req, res) => {
   const { id } = req.params;
   const data = req.body;
@@ -61,18 +77,102 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/food-donation", async (req, res) => {
-  const data = req.body;
+// Upload image to Google Cloud Storage and create food donation
+app.post("/food-donation", upload.single("image"), async (req, res) => {
+  const {
+    productName,
+    category,
+    amount,
+    description,
+    pickupDate,
+    pickupHours,
+    expirationDate,
+    userId,
+  } = req.body;
 
   try {
-    const foodDonation = await prisma.foodDonation.create({
-      data,
-    });
-    res.json(foodDonation);
-  } catch (err) {
-    console.log(err);
+    let imageUrl = null;
 
-    res.status(500).json({ error: "Error creating foodDonation" });
+    // Upload image to Google Cloud Storage if an image is provided
+    if (req.file) {
+      const blob = storage
+        .bucket(bucketName)
+        .file(`${uuidv4()}-${req.file.originalname}`);
+
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+        metadata: {
+          contentType: req.file.mimetype,
+        },
+      });
+
+      blobStream.on("error", (err) => {
+        console.error("Error uploading to GCS:", err);
+        res
+          .status(500)
+          .json({ error: "Error uploading image to Google Cloud Storage" });
+      });
+
+      blobStream.on("finish", async () => {
+        try {
+          // Make the file public
+          await blob.makePublic();
+          console.log("Image uploaded and made public!");
+
+          imageUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+
+          // Save food donation with image URL
+          const foodDonation = await prisma.foodDonation.create({
+            data: {
+              productName,
+              category,
+              amount: parseFloat(amount),
+              description,
+              pickupDate: new Date(pickupDate),
+              pickupHours,
+              expirationDate: new Date(expirationDate),
+              image_url: imageUrl,
+              userId: parseInt(userId),
+            },
+          });
+
+          res.json(foodDonation);
+        } catch (err) {
+          console.error(
+            "Error making file public or saving food donation:",
+            err
+          );
+          res
+            .status(500)
+            .json({
+              error: "Error finalizing image upload or creating food donation",
+            });
+        }
+      });
+
+      blobStream.end(req.file.buffer);
+    } else {
+      // Save food donation without image
+      const foodDonation = await prisma.foodDonation.create({
+        data: {
+          productName,
+          category,
+          amount: parseFloat(amount),
+          description,
+          pickupDate: new Date(pickupDate),
+          pickupHours,
+          expirationDate: new Date(expirationDate),
+          userId: parseInt(userId),
+        },
+      });
+
+      res.json(foodDonation);
+    }
+  } catch (err) {
+    console.error("Error creating food donation:", err);
+    res
+      .status(500)
+      .json({ error: "Error creating food donation in the database" });
   }
 });
 
