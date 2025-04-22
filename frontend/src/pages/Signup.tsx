@@ -13,9 +13,10 @@ export default function Signup({ setUser }: { setUser: (user: User) => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => { 
     e.preventDefault();
     setError("");
+    const a="";
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
