@@ -24,15 +24,17 @@ export default function UploadFood({ user }: { user: User | null }) {
   const [pickupHours, setPickupHours] = useState("");
   const [expirationDate, setExpirationDate] = useState<Date | undefined>();
   const [images, setImages] = useState<FileList | null>(null);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // State for image previews
-  const [address, setAddress] = useState(""); // State for address input
-  const [latitude, setLatitude] = useState<number | null>(null); // State for latitude
-  const [longitude, setLongitude] = useState<number | null>(null); // State for longitude
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [address, setAddress] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [isAddressVerified, setIsAddressVerified] = useState(false); // New state for address verification
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(e.target.value);
+    setIsAddressVerified(false); // Reset verification when the address changes
   };
 
   const fetchCoordinates = async () => {
@@ -50,6 +52,7 @@ export default function UploadFood({ user }: { user: User | null }) {
       if (response.ok) {
         setLatitude(data.latitude);
         setLongitude(data.longitude);
+        setIsAddressVerified(true); // Mark the address as verified
       } else {
         throw new Error(data.message || "Failed to fetch coordinates");
       }
@@ -61,6 +64,12 @@ export default function UploadFood({ user }: { user: User | null }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isAddressVerified) {
+      alert("Please verify the address before submitting.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -78,14 +87,13 @@ export default function UploadFood({ user }: { user: User | null }) {
       if (latitude !== null) formData.append("latitude", latitude.toString());
       if (longitude !== null) formData.append("longitude", longitude.toString());
 
-      // Append the first image file (if any) to the form data
       if (images && images.length > 0) {
-        formData.append("image", images[0]); // Only sending the first image
+        formData.append("image", images[0]);
       }
 
       const response = await fetch("http://localhost:3000/food-donation", {
         method: "POST",
-        body: formData, // Send form data with the image
+        body: formData,
       });
 
       const data = await response.json();
@@ -105,7 +113,6 @@ export default function UploadFood({ user }: { user: User | null }) {
     if (e.target.files) {
       setImages(e.target.files);
 
-      // Generate image previews
       const fileArray = Array.from(e.target.files);
       const previewUrls = fileArray.map((file) => URL.createObjectURL(file));
       setImagePreviews(previewUrls);
@@ -154,7 +161,7 @@ export default function UploadFood({ user }: { user: User | null }) {
               ) : (
                 <div className="absolute inset-0 overflow-hidden rounded-lg">
                   <img
-                    src={imagePreviews[0]} // Show the first preview
+                    src={imagePreviews[0]}
                     alt="Preview"
                     className="w-full h-full object-cover"
                   />
@@ -165,6 +172,7 @@ export default function UploadFood({ user }: { user: User | null }) {
 
           {/* Form Fields */}
           <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm">
+            {/* Product Name */}
             <div>
               <label
                 htmlFor="productName"
@@ -183,6 +191,7 @@ export default function UploadFood({ user }: { user: User | null }) {
               />
             </div>
 
+            {/* Category */}
             <div>
               <label
                 htmlFor="category"
@@ -202,12 +211,13 @@ export default function UploadFood({ user }: { user: User | null }) {
                   .filter((key) => isNaN(Number(key)))
                   .map((key) => (
                     <option key={key} value={key}>
-                      {key.replace(/_/g, " ")}{" "}
+                      {key.replace(/_/g, " ")}
                     </option>
                   ))}
               </select>
             </div>
 
+            {/* Amount */}
             <div>
               <label
                 htmlFor="amount"
@@ -226,6 +236,7 @@ export default function UploadFood({ user }: { user: User | null }) {
               />
             </div>
 
+            {/* Description */}
             <div>
               <label
                 htmlFor="description"
@@ -239,11 +250,12 @@ export default function UploadFood({ user }: { user: User | null }) {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-                placeholder="Except for a few sentences about the product"
+                placeholder="Enter a description of the food item"
                 required
               />
             </div>
 
+            {/* Pickup Date */}
             <div>
               <label
                 htmlFor="pickupDate"
@@ -261,6 +273,7 @@ export default function UploadFood({ user }: { user: User | null }) {
               />
             </div>
 
+            {/* Pickup Hours */}
             <div>
               <label
                 htmlFor="pickupHours"
@@ -282,6 +295,7 @@ export default function UploadFood({ user }: { user: User | null }) {
               </select>
             </div>
 
+            {/* Expiration Date */}
             <div>
               <label
                 htmlFor="expirationDate"
@@ -303,6 +317,7 @@ export default function UploadFood({ user }: { user: User | null }) {
               />
             </div>
 
+            {/* Address */}
             <div>
               <label
                 htmlFor="address"
@@ -324,7 +339,7 @@ export default function UploadFood({ user }: { user: User | null }) {
                 onClick={fetchCoordinates}
                 className="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
               >
-                Get Coordinates
+                Verify the Address
               </button>
               {latitude && longitude && (
                 <p className="text-sm text-gray-500 mt-1">
