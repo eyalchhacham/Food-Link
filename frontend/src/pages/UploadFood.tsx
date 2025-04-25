@@ -25,8 +25,39 @@ export default function UploadFood({ user }: { user: User | null }) {
   const [expirationDate, setExpirationDate] = useState<Date | undefined>();
   const [images, setImages] = useState<FileList | null>(null);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]); // State for image previews
+  const [address, setAddress] = useState(""); // State for address input
+  const [latitude, setLatitude] = useState<number | null>(null); // State for latitude
+  const [longitude, setLongitude] = useState<number | null>(null); // State for longitude
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddress(e.target.value);
+  };
+
+  const fetchCoordinates = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/geolocation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ address }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setLatitude(data.latitude);
+        setLongitude(data.longitude);
+      } else {
+        throw new Error(data.message || "Failed to fetch coordinates");
+      }
+    } catch (err) {
+      console.error("Error fetching coordinates:", err);
+      setError("Failed to fetch coordinates. Please try again.");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +74,9 @@ export default function UploadFood({ user }: { user: User | null }) {
       formData.append("pickupHours", pickupHours);
       if (expirationDate) formData.append("expirationDate", expirationDate.toISOString());
       formData.append("userId", user ? user.id.toString() : "");
+      formData.append("address", address);
+      if (latitude !== null) formData.append("latitude", latitude.toString());
+      if (longitude !== null) formData.append("longitude", longitude.toString());
 
       // Append the first image file (if any) to the form data
       if (images && images.length > 0) {
@@ -267,6 +301,36 @@ export default function UploadFood({ user }: { user: User | null }) {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                 required
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                value={address}
+                onChange={handleAddressChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                placeholder="Enter the address"
+                required
+              />
+              <button
+                type="button"
+                onClick={fetchCoordinates}
+                className="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+              >
+                Get Coordinates
+              </button>
+              {latitude && longitude && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Latitude: {latitude}, Longitude: {longitude}
+                </p>
+              )}
             </div>
           </div>
 
