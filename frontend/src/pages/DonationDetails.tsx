@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Clock, Calendar, MapPin, MessageSquare, Minus, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Calendar,
+  MapPin,
+  MessageSquare,
+  Minus,
+  Plus,
+} from "lucide-react";
 
 export default function DonationDetails() {
   const { id } = useParams(); // Get the donation ID from the URL
@@ -46,17 +54,20 @@ export default function DonationDetails() {
 
       <div className="px-4 py-6">
         <h1 className="text-2xl font-bold mb-2">{donation.productName}</h1>
+
         <div className="flex items-center space-x-2 text-gray-600 mb-2">
           <Clock className="h-5 w-5" />
           <span>{donation.pickupHours || "09:30 AM-08:30 PM"}</span>
         </div>
+
         <div className="flex items-center space-x-2 text-gray-600 mb-2">
           <Calendar className="h-5 w-5" />
           <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
         </div>
-        <div className="flex items-center space-x-2 text-gray-600">
+
+        <div className="flex items-center space-x-2 text-gray-600 mb-2">
           <MapPin className="h-5 w-5" />
-          <span>Tel Aviv - 69 Shlomo Hamelech Street</span>
+          <span>{donation.address || "Unknown address"}</span>
         </div>
 
         <div className="border-t border-b py-4 my-6">

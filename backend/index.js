@@ -12,6 +12,7 @@ const storage = new Storage({
   keyFilename: "./googleCloudStorage.json",
 });
 const { getCoordinates } = require("./Services/geolocationService"); // Import the geolocation service
+const { getAddressFromCoordinates } = require("./Services/geolocationService");
 // Assumes GOOGLE_APPLICATION_CREDENTIALS is set
 const bucketName = "foodlink-uploads"; // Replace with your Google Cloud Storage bucket name
 
@@ -249,6 +250,7 @@ app.get("/food-donations", async (req, res) => {
     res.status(500).json({ error: "Error fetching food donations" });
   }
 });
+
 app.get("/food-donations/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -261,7 +263,35 @@ app.get("/food-donations/:id", async (req, res) => {
       return res.status(404).json({ error: "Donation not found" });
     }
 
-    res.json(donation);
+    let address = null;
+
+    // If coordinates are available, fetch the full address
+    if (donation.latitude && donation.longitude) {
+      try {
+        const apiKey = process.env.GOOGLE_GEO_LOCATION; // משתנה סביבה שהגדרת
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${donation.latitude},${donation.longitude}&key=${apiKey}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status === "OK" && data.results.length > 0) {
+          address = data.results[0].formatted_address; // Use the full formatted address
+        } else {
+          console.warn("Geocoding API returned no results or an error:", data.status);
+          address = "Address not found";
+        }
+      } catch (err) {
+        console.warn("Could not get address from coordinates:", err.message);
+        address = "Error fetching address";
+      }
+    } else {
+      address = "Coordinates not available";
+    }
+
+    // Return the donation details along with the full address
+    res.json({
+      ...donation,
+      address,
+    });
   } catch (err) {
     console.error("Error fetching donation:", err);
     res.status(500).json({ error: "Error fetching donation" });
