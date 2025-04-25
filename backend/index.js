@@ -11,6 +11,7 @@ const { Storage } = require("@google-cloud/storage");
 const storage = new Storage({
   keyFilename: "./googleCloudStorage.json",
 });
+const { getCoordinates } = require("./Services/geolocationService"); // Import the geolocation service
 // Assumes GOOGLE_APPLICATION_CREDENTIALS is set
 const bucketName = "foodlink-uploads"; // Replace with your Google Cloud Storage bucket name
 
@@ -21,6 +22,18 @@ app.use(cors());
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
+
+app.post("/api/geolocation", async (req, res) => {
+  const { address } = req.body;
+
+  try {
+    const coordinates = await getCoordinates(address);
+    res.json(coordinates);
+  } catch (error) {
+    console.error("Error in geolocation API:", error.message);
+    res.status(500).json({ message: "Failed to fetch coordinates" });
+  }
 });
 
 app.post("/users", async (req, res) => {
@@ -88,7 +101,10 @@ app.post("/food-donation", upload.single("image"), async (req, res) => {
     pickupHours,
     expirationDate,
     userId,
+    latitude, // Added latitude
+    longitude, // Added longitude
   } = req.body;
+  console.log(req.body)
 
   try {
     let imageUrl = null;
@@ -132,6 +148,8 @@ app.post("/food-donation", upload.single("image"), async (req, res) => {
               pickupHours,
               expirationDate: new Date(expirationDate),
               image_url: imageUrl,
+              latitude: latitude ? parseFloat(latitude) : null, // Save latitude
+              longitude: longitude ? parseFloat(longitude) : null, // Save longitude
               userId: parseInt(userId),
             },
           });
@@ -162,6 +180,8 @@ app.post("/food-donation", upload.single("image"), async (req, res) => {
           pickupDate: new Date(pickupDate),
           pickupHours,
           expirationDate: new Date(expirationDate),
+          latitude: latitude ? parseFloat(latitude) : null, // Save latitude
+          longitude: longitude ? parseFloat(longitude) : null, // Save longitude
           userId: parseInt(userId),
         },
       });
@@ -175,7 +195,6 @@ app.post("/food-donation", upload.single("image"), async (req, res) => {
       .json({ error: "Error creating food donation in the database" });
   }
 });
-
 app.get("/food-donations", async (req, res) => {
   const { searchQuery, category } = req.query;
 
