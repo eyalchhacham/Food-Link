@@ -43,12 +43,17 @@ export default function DonationDetails() {
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
-        <div className="bg-gray-200 h-64">
+        <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px]">
           <img
             src={donation.image_url || "https://via.placeholder.com/150"}
             alt={donation.productName}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain" // שימוש ב-object-contain כדי למנוע חיתוך
           />
+          {!donation.image_url && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white text-lg font-bold">
+              No Image Available
+            </div>
+          )}
         </div>
       </div>
 
