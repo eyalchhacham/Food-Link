@@ -104,7 +104,7 @@ app.post("/food-donation", upload.single("image"), async (req, res) => {
     latitude, // Added latitude
     longitude, // Added longitude
   } = req.body;
-  console.log(req.body)
+  
 
   try {
     let imageUrl = null;
@@ -196,7 +196,7 @@ app.post("/food-donation", upload.single("image"), async (req, res) => {
   }
 });
 app.get("/food-donations", async (req, res) => {
-  const { searchQuery, category } = req.query;
+  const { searchQuery, category, latitude, longitude, radius } = req.query;
 
   const categoriesArray = category
     ? category.includes(",")
@@ -204,9 +204,6 @@ app.get("/food-donations", async (req, res) => {
       : [category]
     : [];
 
-  if (categoriesArray.length == 0 && !searchQuery) {
-    return res.json([]);
-  }
   try {
     const donations = await prisma.foodDonation.findMany({
       where: {
@@ -230,6 +227,18 @@ app.get("/food-donations", async (req, res) => {
                 },
               }
             : {},
+          latitude && longitude
+            ? {
+                latitude: {
+                  gte: parseFloat(latitude) - parseFloat(radius) / 111,
+                  lte: parseFloat(latitude) + parseFloat(radius) / 111,
+                },
+                longitude: {
+                  gte: parseFloat(longitude) - parseFloat(radius) / (111 * Math.cos(parseFloat(latitude) * (Math.PI / 180))),
+                  lte: parseFloat(longitude) + parseFloat(radius) / (111 * Math.cos(parseFloat(latitude) * (Math.PI / 180))),
+                },
+              }
+            : {},
         ],
       },
     });
@@ -240,7 +249,6 @@ app.get("/food-donations", async (req, res) => {
     res.status(500).json({ error: "Error fetching food donations" });
   }
 });
-
 app.get("/food-donations/:id", async (req, res) => {
   const { id } = req.params;
 

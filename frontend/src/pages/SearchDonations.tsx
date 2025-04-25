@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Home, Search, MessageCircle, User, ArrowLeft } from "lucide-react"; // Import ArrowLeft
+import { Home, Search, MessageCircle, User, ArrowLeft } from "lucide-react";
 import { CategoryChip } from "../components/CategoryChip";
 import { SearchBar } from "../components/SearchBar";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   "prepared_meals",
@@ -18,10 +18,20 @@ export default function SearchDonation() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [donations, setDonations] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate(); // Initialize navigate
+  const [isLoading, setIsLoading] = useState(false);
+  const [inMyArea, setInMyArea] = useState(false); // State for "In My Area" filter
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null); // User's location
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if any filters are active
+    const hasFilters = searchQuery || selectedCategories.length > 0 || inMyArea;
+
+    if (!hasFilters) {
+      setDonations([]); // Clear donations if no filters are selected
+      return;
+    }
+
     // Fetch donations from the backend
     const fetchDonations = async () => {
       setIsLoading(true);
@@ -30,6 +40,11 @@ export default function SearchDonation() {
         if (searchQuery) queryParams.append("searchQuery", searchQuery);
         if (selectedCategories.length > 0)
           queryParams.append("category", selectedCategories.join(","));
+        if (inMyArea && userLocation) {
+          queryParams.append("latitude", userLocation.latitude.toString());
+          queryParams.append("longitude", userLocation.longitude.toString());
+          queryParams.append("radius", "20"); // Radius in kilometers
+        }
 
         const response = await fetch(
           `http://localhost:3000/food-donations?${queryParams.toString()}`
@@ -44,7 +59,7 @@ export default function SearchDonation() {
     };
 
     fetchDonations();
-  }, [searchQuery, selectedCategories]);
+  }, [searchQuery, selectedCategories, inMyArea, userLocation]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -54,12 +69,38 @@ export default function SearchDonation() {
     );
   };
 
+  const handleInMyAreaToggle = () => {
+    if (!inMyArea) {
+      // Get user's location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+            setInMyArea(true);
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            alert("Unable to fetch your location. Please enable location services.");
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by your browser.");
+      }
+    } else {
+      // Disable "In My Area" filter
+      setInMyArea(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header with Back Button and Title Centered */}
       <div className="flex items-center justify-center px-4 py-4">
         <button
-          onClick={() => navigate(-1)} // Navigate back
+          onClick={() => navigate(-1)}
           className="p-2 bg-white rounded-full shadow-md mr-2"
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
@@ -79,11 +120,20 @@ export default function SearchDonation() {
           {categories.map((category) => (
             <CategoryChip
               key={category}
-              label={category.replace("_", " ")} // Display category names in a readable format
+              label={category.replace("_", " ")}
               selected={selectedCategories.includes(category)}
               onClick={() => toggleCategory(category)}
             />
           ))}
+        </div>
+
+        {/* "In My Area" Filter */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <CategoryChip
+            label="In My Area"
+            selected={inMyArea}
+            onClick={handleInMyAreaToggle}
+          />
         </div>
 
         {/* Donations List */}
@@ -95,7 +145,7 @@ export default function SearchDonation() {
               <div
                 key={donation.id}
                 className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm cursor-pointer"
-                onClick={() => navigate(`/donation-details/${donation.id}`)} // Navigate to DonationDetails
+                onClick={() => navigate(`/donation-details/${donation.id}`)}
               >
                 <img
                   src={donation.image_url || "https://via.placeholder.com/150"}
@@ -122,7 +172,7 @@ export default function SearchDonation() {
               </div>
             ))
           ) : (
-            <p>No donations found.</p>
+            <p>No donations found. Please use the filters to search.</p>
           )}
         </div>
       </div>
