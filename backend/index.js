@@ -301,3 +301,62 @@ app.get("/food-donations/:id", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
+
+app.post("/user-location", async (req, res) => {
+  const { userId, latitude, longitude, address } = req.body;
+
+  try {
+    // קודם לבדוק אם כבר יש מיקום קיים למשתמש
+    const existingLocation = await prisma.user_locations.findFirst({
+      where: { user_id: parseInt(userId) },
+    });
+
+    if (existingLocation) {
+      // אם יש מיקום ➔ נעדכן אותו
+      const updatedLocation = await prisma.user_locations.update({
+        where: { id: existingLocation.id },
+        data: {
+          latitude: latitude ? parseFloat(latitude) : null,
+          longitude: longitude ? parseFloat(longitude) : null,
+          address,
+        },
+      });
+      res.status(200).json(updatedLocation);
+    } else {
+      // אם אין מיקום ➔ ניצור חדש
+      const newLocation = await prisma.user_locations.create({
+        data: {
+          user_id: parseInt(userId),
+          latitude: latitude ? parseFloat(latitude) : null,
+          longitude: longitude ? parseFloat(longitude) : null,
+          address,
+        },
+      });
+      res.status(201).json(newLocation);
+    }
+  } catch (error) {
+    console.error("Error handling user location:", error);
+    res.status(500).json({ error: "Failed to handle user location" });
+  }
+});
+
+app.get("/user-location/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const location = await prisma.user_locations.findUnique({
+      where: {
+        user_id: parseInt(userId),
+      },
+    });
+
+    if (!location) {
+      return res.status(404).json({ message: "Location not found" });
+    }
+
+    res.json(location);
+  } catch (error) {
+    console.error("Error fetching user location:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});

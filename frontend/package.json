@@ -12,6 +12,9 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
+    "@radix-ui/react-popover": "^1.1.11",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-tooltip": "^1.2.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
