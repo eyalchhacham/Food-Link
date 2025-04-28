@@ -1,3 +1,4 @@
+//נועה התקינה npm install google-auth-library
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
@@ -15,6 +16,7 @@ const { getCoordinates } = require("./Services/geolocationService"); // Import t
 const { getAddressFromCoordinates } = require("./Services/geolocationService");
 // Assumes GOOGLE_APPLICATION_CREDENTIALS is set
 const bucketName = "foodlink-uploads"; // Replace with your Google Cloud Storage bucket name
+const { loginWithGoogle } = require("./Services/googleLoginService"); //  googleLoginService.js מייבא את 
 
 app.use(express.json());
 app.use(cors());
@@ -36,6 +38,24 @@ app.post("/api/geolocation", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch coordinates" });
   }
 });
+
+app.post("/login/google", async (req, res) => {
+  const { access_token } = req.body;
+
+  try {
+    const user = await loginWithGoogle(access_token);
+
+    res.json({
+      message: "Google login successful",
+      user,
+    });
+
+  } catch (err) {
+    console.error("Error during Google login:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 app.post("/users", async (req, res) => {
   const data = req.body;

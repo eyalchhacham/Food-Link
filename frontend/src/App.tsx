@@ -7,6 +7,7 @@ import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import SearchDonation from "./pages/SearchDonations";
 import DonationDetails from "./pages/DonationDetails";  
+import { GoogleOAuthProvider } from "@react-oauth/google"; // צריך להתקין npm install @react-oauth/google
 
 
 export type User = {
@@ -24,6 +25,7 @@ function App() {
   };
 
   return (
+  <GoogleOAuthProvider clientId="944261243243-9imvkcre729n8c1elqiiohhklb08tkba.apps.googleusercontent.com"> 
     <Router>
       <Routes>
         <Route
@@ -65,6 +67,7 @@ function App() {
         />
       </Routes>
     </Router>
+  </GoogleOAuthProvider>
   );
 }
 
