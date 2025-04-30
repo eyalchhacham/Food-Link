@@ -3,40 +3,54 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id          Int    @id @default(autoincrement())
-  password    String
-  email       String @unique
-  name        String
-  phoneNumber String @map("phone_number")
-
+  id           Int            @id @default(autoincrement())
+  password     String
+  email        String         @unique
+  name         String
+  phoneNumber  String         @map("phone_number")
+  user_locations user_locations[]
   FoodDonation FoodDonation[]
+}
+
+model user_locations {
+  id        String   @id @default(uuid())
+  user_id   Int
+  latitude  Float?
+  longitude Float?
+  address   String?
+  created_at DateTime @default(now())
+
+  User User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_locations")
+  @@unique([user_id])
 }
 
 model FoodDonation {
   id             Int            @id @default(autoincrement())
   productName    String         @map("product_name")
   description    String
-  image_url      String? // Optional
+  image_url      String?
   amount         Float
   expirationDate DateTime
   pickupDate     DateTime
-  latitude       Float? // Optional
-  longitude      Float? // Optional 
+  latitude       Float?
+  longitude      Float?
   pickupHours    String?        @map("pickup_hours")
   category       Category
   status         DonationStatus @default(available)
-  claimed_by     String? // Email
-  dietary_notes  String? // Optional
-  userId         Int            @map("user_id") // Foreign key to User
-  user           User           @relation(fields: [userId], references: [id]) // Relation to User
+  claimed_by     String?
+  dietary_notes  String?
+  userId         Int            @map("user_id")
+  user           User           @relation(fields: [userId], references: [id])
 
-  @@map("food_donations") // optional: for custom table name
+  @@map("food_donations")
 }
 
 enum Unit {
