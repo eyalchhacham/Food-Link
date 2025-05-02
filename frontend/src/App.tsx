@@ -6,8 +6,9 @@ import UploadFood from "./pages/UploadFood";
 import HomePage from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import SearchDonation from "./pages/SearchDonations";
-import DonationDetails from "./pages/DonationDetails";  
-
+import SearchResults from "./pages/SearchResults";
+import DonationDetails from "./pages/DonationDetails"; 
+import LocationSetup from "./pages/LocationSetup"; 
 
 export type User = {
   id: string;
@@ -15,6 +16,18 @@ export type User = {
   name: string;
   phoneNumber: string;
 };
+
+export interface Donation {
+  id: number;
+  image_url?: string;
+  productName: string;
+  category: string;
+  latitude?: number;
+  longitude?: number;
+  pickupDate?: string;       
+  pickupHours?: string;      
+  description?: string;
+}
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -50,7 +63,12 @@ function App() {
             />
           }
         />
-        <Route path="/search-donation" element={<SearchDonation />} />
+        <Route
+          path="/location-setup"
+          element={<LocationSetup user={user} />} 
+        />
+        <Route path="/search-donation" element={<SearchDonation user={user} />} />
+        <Route path="/search-results" element={<SearchResults />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/upload-food" element={<UploadFood user={user} />} />
         <Route

@@ -1,206 +1,227 @@
-import React, { useState, useEffect } from "react";
-import { Home, Search, MessageCircle, User, ArrowLeft } from "lucide-react";
-import { CategoryChip } from "../components/CategoryChip";
-import { SearchBar } from "../components/SearchBar";
+import React, { useEffect, useState } from "react";
+import {
+  Home,
+  Search,
+  MessageCircle,
+  User,
+  MapPin,
+  Plus,
+  ChevronDown,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "../components/ui/popover";
 
 const categories = [
-  "prepared_meals",
-  "fresh_produce",
-  "canned_goods",
-  "bakery",
-  "dairy",
-  "meat",
-  "other",
+  "prepared meals", "fresh produce", "canned goods", "bakery", "dairy", "meat",
+  "snacks", "frozen foods", "beverages", "grains", "pasta", "baking ingredients",
+  "sauces", "spices", "condiments", "nuts & seeds", "breakfast cereals", "baby food",
+  "plant-based alternatives"
 ];
 
-export default function SearchDonation() {
+import type { User as UserType } from "../App";
+
+interface SearchDonationProps {
+  user: UserType | null;
+}
+
+export default function SearchDonation({ user }: SearchDonationProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [donations, setDonations] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [inMyArea, setInMyArea] = useState(false); // State for "In My Area" filter
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null); // User's location
+  const [userLocation, setUserLocation] = useState<string>("Getting location...");
+  const [addressInput, setAddressInput] = useState("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if any filters are active
-    const hasFilters = searchQuery || selectedCategories.length > 0 || inMyArea;
-
-    if (!hasFilters) {
-      setDonations([]); // Clear donations if no filters are selected
-      return;
+    if (user?.id) {
+      fetchUserLocation(parseInt(user.id));
     }
+  }, [user]);
 
-    // Fetch donations from the backend
-    const fetchDonations = async () => {
-      setIsLoading(true);
-      try {
-        const queryParams = new URLSearchParams();
-        if (searchQuery) queryParams.append("searchQuery", searchQuery);
-        if (selectedCategories.length > 0)
-          queryParams.append("category", selectedCategories.join(","));
-        if (inMyArea && userLocation) {
-          queryParams.append("latitude", userLocation.latitude.toString());
-          queryParams.append("longitude", userLocation.longitude.toString());
-          queryParams.append("radius", "20"); // Radius in kilometers
+  async function fetchUserLocation(userId: number) {
+    try {
+      const response = await fetch(`http://localhost:3000/user-location/${userId}`);
+      if (!response.ok) throw new Error("Failed to fetch user location");
+
+      const data = await response.json();
+      if (data?.address) {
+        setUserLocation(data.address);
+        setAddressInput(data.address);
+        if (data.latitude && data.longitude) {
+          setCoords({ lat: data.latitude, lng: data.longitude });
         }
-
-        const response = await fetch(
-          `http://localhost:3000/food-donations?${queryParams.toString()}`
-        );
-        const data = await response.json();
-        setDonations(data);
-      } catch (error) {
-        console.error("Error fetching donations:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDonations();
-  }, [searchQuery, selectedCategories, inMyArea, userLocation]);
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((cat) => cat !== category)
-        : [...prev, category]
-    );
-  };
-
-  const handleInMyAreaToggle = () => {
-    if (!inMyArea) {
-      // Get user's location
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-            setInMyArea(true);
-          },
-          (error) => {
-            console.error("Error getting location:", error);
-            alert("Unable to fetch your location. Please enable location services.");
-          }
-        );
       } else {
-        alert("Geolocation is not supported by your browser.");
+        setUserLocation("Location not available");
       }
-    } else {
-      // Disable "In My Area" filter
-      setInMyArea(false);
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+      setUserLocation("Location unavailable");
     }
+  }
+
+  async function saveUserLocation(userId: number, latitude: number, longitude: number, address: string) {
+    try {
+      const response = await fetch("http://localhost:3000/user-location", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, latitude, longitude, address }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save location");
+    } catch (error) {
+      console.error("Error saving location:", error);
+    }
+  }
+
+  async function handleAddressSubmit() {
+    if (!addressInput) return;
+
+    try {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressInput)}&key=${apiKey}`
+      );
+      const data = await response.json();
+
+      if (data.status === "OK") {
+        const location = data.results[0].geometry.location;
+        setUserLocation(addressInput);
+        setCoords({ lat: location.lat, lng: location.lng });
+        setIsPopoverOpen(false);
+
+        if (user?.id) {
+          await saveUserLocation(parseInt(user.id), location.lat, location.lng, addressInput);
+        }
+      } else {
+        alert("Address not found. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error updating address:", error);
+    }
+  }
+
+  const goToSearchResults = (query: string) => {
+    if (!coords || !query) return;
+    navigate("/search-results", {
+      state: {
+        query,
+        userLocation,
+        coords,
+        user,
+      },
+    });
   };
+
+  const handleCategoryClick = (category: string) => {
+    setSearchQuery((prev) => {
+      if (prev.toLowerCase().includes(category.toLowerCase())) return prev;
+      return prev.length > 0 ? `${prev} ${category}` : category;
+    });
+    goToSearchResults(category);
+  };
+
+  if (!user) {
+    return <div className="text-center py-10 text-gray-500">Please log in to use this feature.</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header with Back Button and Title Centered */}
-      <div className="flex items-center justify-center px-4 py-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 bg-white rounded-full shadow-md mr-2"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-700" />
-        </button>
-        <h1 className="text-xl font-bold">Search Donations</h1>
-      </div>
+    <div className="max-w-[430px] mx-auto min-h-screen bg-white">
+      <div className="p-4">
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto px-4 pt-4 pb-20">
-        {/* Search Bar */}
-        <div className="mb-6">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        {/* Search bar */}
+        <div className="mb-2 flex items-center gap-2">
+          <div className="flex-1">
+            <div className="w-full bg-gray-100 px-4 py-2 rounded-full min-h-[40px] flex items-center">
+              <input
+                type="text"
+                className="w-full bg-transparent focus:outline-none text-sm text-gray-700 placeholder:text-gray-400 transition-opacity duration-300 ease-in"
+                placeholder="Search food and items"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    goToSearchResults(searchQuery.trim());
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Location line */}
+        <div className="flex items-center gap-2 mb-6 text-sm">
+          <MapPin className="w-4 h-4 text-[#6B9F9F]" />
+          <span className="text-black">Search near</span>
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <PopoverTrigger asChild>
+              <span className="text-[#6B9F9F] cursor-pointer flex items-center gap-1">
+                <span className="font-medium">{userLocation}</span>
+                <ChevronDown className="w-4 h-4 text-[#6B9F9F]" />
+              </span>
+            </PopoverTrigger>
+            <PopoverContent
+              side="bottom"
+              align="start"
+              sideOffset={8}
+              className="max-w-[90vw] w-[300px] rounded-xl border bg-white p-4 shadow-md text-gray-700"
+            >
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Enter your address..."
+                  value={addressInput}
+                  onChange={(e) => setAddressInput(e.target.value)}
+                  className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleAddressSubmit}
+                  className="bg-emerald-500 text-white hover:bg-emerald-600 w-full"
+                >
+                  Save Location
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Categories */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {categories.map((category) => (
-            <CategoryChip
-              key={category}
-              label={category.replace("_", " ")}
-              selected={selectedCategories.includes(category)}
-              onClick={() => toggleCategory(category)}
-            />
+        <div className="flex flex-wrap gap-2 px-4 mt-4 justify-center">
+          {categories.map((cat) => (
+            <div
+              key={cat}
+              onClick={() => handleCategoryClick(cat)}
+              className="px-4 py-2 rounded-full text-sm font-medium shadow-sm cursor-pointer transition-all bg-[#6B9F9F] text-white text-center"
+            >
+              {cat}
+            </div>
           ))}
         </div>
-
-        {/* "In My Area" Filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <CategoryChip
-            label="In My Area"
-            selected={inMyArea}
-            onClick={handleInMyAreaToggle}
-          />
-        </div>
-
-        {/* Donations List */}
-        <div className="space-y-4">
-          {isLoading ? (
-            <p>Loading donations...</p>
-          ) : donations.length > 0 ? (
-            donations.map((donation) => (
-              <div
-                key={donation.id}
-                className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm cursor-pointer"
-                onClick={() => navigate(`/donation-details/${donation.id}`)}
-              >
-                <img
-                  src={donation.image_url || "https://via.placeholder.com/150"}
-                  alt={donation.productName}
-                  className="h-16 w-16 rounded-lg object-cover mr-4"
-                />
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    {donation.productName}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {donation.description}
-                  </p>
-                  <span
-                    className={`text-xs font-medium ${
-                      donation.status === "available"
-                        ? "text-green-600"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {donation.status}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No donations found. Please use the filters to search.</p>
-          )}
-        </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-md mx-auto px-6 py-2">
-          <div className="flex justify-between items-center">
-            <button className="p-2 text-gray-600 hover:text-teal-500">
-              <Home className="h-6 w-6" />
-            </button>
-            <button className="p-2 text-teal-500">
-              <Search className="h-6 w-6" />
-            </button>
-            <button className="p-2 relative">
-              <div className="absolute -top-1 -right-1 h-8 w-8 bg-teal-400 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white text-2xl">+</span>
-              </div>
-            </button>
-            <button className="p-2 text-gray-600 hover:text-teal-500">
-              <MessageCircle className="h-6 w-6" />
-            </button>
-            <button className="p-2 text-gray-600 hover:text-teal-500">
-              <User className="h-6 w-6" />
+      {/* Bottom navigation */}
+      <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[430px] bg-white border-t shadow-sm z-50">
+        <div className="relative flex justify-between items-center px-6 py-3">
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/home", { replace: true })}>
+            <Home className="h-6 w-6" />
+          </button>
+          <button className="p-2 text-[#6B9F9F] mr-8">
+            <Search className="h-6 w-6" />
+          </button>
+          <div className="absolute left-1/2 transform -translate-x-1/2 -top-5 z-10">
+            <button onClick={() => navigate("/upload-food")} className="bg-[#6B9F9F] text-white w-14 h-14 rounded-full shadow-md flex items-center justify-center">
+              <Plus className="w-6 h-6" />
             </button>
           </div>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8" onClick={() => navigate("/messages")}>
+            <MessageCircle className="h-6 w-6" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile", { state: { user } })}>
+           <User className="h-6 w-6" />
+          </button>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

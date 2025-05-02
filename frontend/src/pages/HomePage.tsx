@@ -21,8 +21,8 @@ import {
   TooltipTrigger,
 } from "../components/ui/tooltip";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import SkeletonCard from "../components/ui/skeleton-card";
 import { Popover, PopoverTrigger, PopoverContent } from "../components/ui/popover";
+import Spinner from "../components/ui/Spinner";
 
 interface Donation {
   id: number;
@@ -58,7 +58,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const navigate = useNavigate();
 
-
+  // 1. שליפת מיקום ראשונית
   useEffect(() => {
     if (user?.id) {
       fetchUserLocation(parseInt(user.id));  // נשלח בקשה לשרת להביא מיקום
@@ -66,12 +66,32 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
       initializeLocation();  // רק אם אין יוזר, ננסה מהמכשיר
     }
   }, []);  
-
+  
+  // 2. טעינת תרומות אחרי שיש מיקום
   useEffect(() => {
     if (userLocation) {
       loadDonations();
     }
   }, [userLocation]);
+
+  // 3. הפניה להגדרת מיקום אם אין מיקום למשתמש
+  
+  useEffect(() => {
+    if (
+      user &&
+      (!userLocation ||
+        userLocation.latitude == null ||
+        userLocation.longitude == null)
+    ) {
+       // מחכים רגע לראות אם ייקבע מיקום, אחרת מפנים
+      const timeout = setTimeout(() => {
+        navigate("/location-setup");
+      }, 1500);
+    
+      return () => clearTimeout(timeout);
+    }
+  }, [user, userLocation]);
+  
 
   const initializeLocation = () => {
     try {
@@ -214,6 +234,12 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
           longitude: location.lng,
           name: address,
         });
+
+        localStorage.setItem("userLocation", JSON.stringify({
+          latitude: location.lat,
+          longitude: location.lng,
+          name: address,
+        }));
 
         setIsPopoverOpen(false); 
 
@@ -359,12 +385,13 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
         </TooltipProvider>
       </header>
       <div className="grid grid-cols-2 gap-4 px-4">
-        {isLoading
-          ? Array(6)
-              .fill(0)
-              .map((_, i) => <SkeletonCard key={i} />)
-          : donations.map((donation) => (
-              <div key={donation.id} className="space-y-2">
+        {isLoading ? (
+           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-white">
+             <Spinner />
+           </div>
+              ) : donations.map((donation) => (
+
+              <div key={donation.id} className="space-y-2" onClick={() => navigate(`/donation-details/${donation.id}`)}>
                 <div className="aspect-square relative rounded-xl overflow-hidden">
                   <img
                     src={
@@ -403,58 +430,31 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
       </div>
 
       <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[430px] bg-white border-t shadow-sm z-50">
-        <TooltipProvider>
-          <div className="relative flex justify-between items-center px-6 py-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => navigate("/home", { replace: true })}>                  
-                  <Home className="w-6 h-6 text-gray-700" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Home</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => navigate("/search-donation")}
-                className="mr-8">
-                  <Search className="w-6 h-6 text-gray-700" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Search</TooltipContent>
-            </Tooltip>
-            <div className="absolute left-1/2 transform -translate-x-1/2 -top-5 z-10">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => navigate("/upload-food")}
-                    className="bg-emerald-500 text-white w-14 h-14 rounded-full shadow-md flex items-center justify-center"
-                  >
-                    <Plus className="w-6 h-6" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Upload</TooltipContent>
-              </Tooltip>
-            </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => navigate("/messages")}
-                className="ml-8">
-                  <MessageCircle className="w-6 h-6 text-gray-700" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Messages</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => navigate("/my-profile", { state: { user } })}>
-                  <User className="w-6 h-6 text-gray-700" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Profile</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      </footer>
+  <div className="relative flex justify-between items-center px-6 py-3">
+    <button className="p-2 text-[#6B9F9F]" onClick={() => navigate("/home", { replace: true })}>
+      <Home className="h-6 w-6" />
+    </button>
+    <button className="p-2 text-gray-600 hover:text-[#6B9F9F] mr-8" onClick={() => navigate("/search-donation")}>
+      <Search className="h-6 w-6" />
+    </button>
+    <div className="absolute left-1/2 transform -translate-x-1/2 -top-5 z-10">
+      <button
+        onClick={() => navigate("/upload-food")}
+        className="bg-[#6B9F9F] text-white w-14 h-14 rounded-full shadow-md flex items-center justify-center"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+    </div>
+    <button className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8" onClick={() => navigate("/messages")}>
+      <MessageCircle className="h-6 w-6" />
+    </button>
+    <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile", { state: { user } })}>
+      <User className="h-6 w-6" />
+    </button>
+
+  </div>
+</footer>
+
     </div>
   );
 }
