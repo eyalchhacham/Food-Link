@@ -14,11 +14,11 @@ model User {
   email        String         @unique
   name         String
   phoneNumber  String         @map("phone_number")
-  user_locations user_locations[]
+  locations UserLocation[]
   FoodDonation FoodDonation[]
 }
 
-model user_locations {
+model UserLocation {
   id        String   @id @default(uuid())
   user_id   Int
   latitude  Float?

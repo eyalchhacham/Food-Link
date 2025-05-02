@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Spinner from "../components/ui/Spinner";
 import {
   ArrowLeft,
   Clock,
@@ -31,8 +32,13 @@ export default function DonationDetails() {
   }, [id]);
 
   if (!donation) {
-    return <p>Loading donation details...</p>;
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <Spinner />
+      </div>
+    );
   }
+  
 
   return (
     <div className="min-h-screen bg-white">
