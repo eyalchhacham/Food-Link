@@ -49,12 +49,12 @@ app.post("/login/google", async (req, res) => {
       message: "Google login successful",
       user,
     });
-
   } catch (err) {
     console.error("Error during Google login:", err.message);
     res.status(500).json({ message: err.message });
   }
 });
+
 
 
 app.post("/users", async (req, res) => {

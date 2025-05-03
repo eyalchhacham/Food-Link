@@ -3,6 +3,7 @@ import { Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google"; // צריך להתקין npm install @react-oauth/google
 import { User } from "../App";
+import logo from "../logo.png";
 
 export default function Login({ setUser }: { setUser: (user: User) => void }) {
   const [email, setEmail] = useState("");
@@ -72,120 +73,78 @@ export default function Login({ setUser }: { setUser: (user: User) => void }) {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div className="sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="flex justify-center">
-        <Link to="/" className="flex items-center space-x-2">
-          <Heart className="w-8 h-8 text-emerald-600" />
-          <span className="text-2xl font-bold text-gray-900">FoodLink</span>
-        </Link>
-      </div>
-      <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Sign in to your account
-      </h2>
-      <p className="mt-2 text-center text-sm text-gray-600">
-        Or{" "}
-        <Link
-          to="/signup"
-          className="font-medium text-emerald-600 hover:text-emerald-500"
+    <div className="max-w-[430px] mx-auto min-h-screen bg-[#fefdfb]">
+    <div className="w-full h-[874px] bg-[#e8e2d8] shadow-lg rounded-3xl p-6 flex flex-col items-center">
+      <img
+        src={logo}
+        alt="FoodLink Logo"
+        className="w-40 h-40 object-contain mt-6"
+      />
+
+      <h1 className="text-3xl font-bold text-[#2c7063] mt-4">FoodLink</h1>
+      <Link to="/signup" className="font-semibold text-[#2c7063] hover:underline">
+        create an account
+      </Link>
+      <p className="text-sm text-[#368f89] mt-1 mb-4 text-center">
+        Enter your email to sign up for this app
+      </p>
+
+      <form onSubmit={handleSubmit} className="w-full px-4 flex flex-col gap-3">
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="user_name@ac.il"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2c7063]"
+        />
+
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2c7063]"
+        />
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-[#5d9b94] hover:bg-[#4b867e] text-white py-2 rounded-md font-medium"
         >
-          create a new account
-        </Link>
+          {isLoading ? "Signing up..." : "Sign up with email"}
+        </button>
+      </form>
+
+      <div className="flex items-center my-4 w-full px-4">
+        <div className="flex-grow border-t border-gray-300"></div>
+        <span className="mx-2 text-sm text-gray-600">or continue with</span>
+        <div className="flex-grow border-t border-gray-300"></div>
+      </div>
+
+      <button
+        onClick={() => loginWithGoogle()}
+        className="w-[85%] flex justify-center items-center py-2 border border-gray-300 rounded-md bg-white text-black text-sm font-medium"
+      >
+        <img
+          src="https://developers.google.com/identity/images/g-logo.png"
+          alt="Google"
+          className="w-5 h-5 mr-2"
+        />
+        Google
+      </button>
+
+      <p className="text-xs text-center text-gray-600 mt-4 px-6">
+        By clicking continue, you agree to our <span className="font-semibold">Terms of Service</span> and <span className="font-semibold">Privacy Policy</span>
       </p>
     </div>
-
-    <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-        {/* טופס התחברות רגיל */}
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <div className="mt-1">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
-            <div className="text-sm">
-              <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
-                Forgot your password?
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </button>
-          </div>
-        </form>
-
-        {/* כפתור התחברות עם גוגל */}
-        <div className="mt-6">
-          <button
-            onClick={() => loginWithGoogle()}
-            className="w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="Google"
-              className="w-5 h-5 mr-2"
-            />
-            Sign in with Google
-          </button>
-        </div>
-
-      </div>
-    </div>
   </div>
-);
+  );
 }
+
+  
