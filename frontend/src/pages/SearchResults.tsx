@@ -51,12 +51,13 @@ export default function SearchResults() {
       try {
         const res = await fetch("http://localhost:3000/food-donations");
         const data = await res.json();
-
+      
         const filtered = data.filter((donation: Donation) => {
+          const normalize = (text: string) => text.toLowerCase().replace(/\s+/g, "_");
           const matchesQuery =
+            !searchText ||
             donation.productName.toLowerCase().includes(searchText.toLowerCase()) ||
-            donation.category.toLowerCase().includes(searchText.toLowerCase());
-
+            normalize(donation.category) === normalize(searchText);
           if (!coords || !donation.latitude || !donation.longitude) return false;
 
           const R = 6371;
@@ -70,7 +71,9 @@ export default function SearchResults() {
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           const distance = R * c;
 
-          return matchesQuery && distance < 10;
+          //console.log("donation:", donation.productName, "| category:", donation.category, "| query:", searchText, "| match:", matchesQuery);
+
+          return matchesQuery && distance < 20;
         });
 
         const filteredWithDistance = filtered.map((donation: Donation): DonationWithDistance => {
@@ -184,12 +187,12 @@ export default function SearchResults() {
                   placeholder="Enter your address..."
                   value={addressInput}
                   onChange={(e) => setAddressInput(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  className="w-full p-3 rounded-lg border-2 border-[#D6D1C8] bg-white text-[#5F9C9C] placeholder-[#5F9C9C] shadow-none focus:outline-none focus:ring-0"
                 />
                 <Button
                   size="sm"
                   onClick={handleAddressSubmit}
-                  className="bg-emerald-500 text-white hover:bg-emerald-600 w-full"
+                  className="bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] w-full"
                 >
                   Save Location
                 </Button>
@@ -214,11 +217,11 @@ export default function SearchResults() {
               >
                 <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 mr-4">
                   <img
-                    src={donation.image_url || "https://via.placeholder.com/150?text=No+Image"}
+                    src={donation.image_url?.startsWith("http") ? donation.image_url : "/default-image.png"}
                     alt={donation.productName}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Image+Error";
+                      (e.target as HTMLImageElement).src = "/default-image.png";
                     }}
                   />
                 </div>
