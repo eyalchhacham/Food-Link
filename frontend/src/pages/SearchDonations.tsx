@@ -172,12 +172,12 @@ export default function SearchDonation({ user }: SearchDonationProps) {
                   placeholder="Enter your address..."
                   value={addressInput}
                   onChange={(e) => setAddressInput(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  className="w-full p-3 rounded-lg border-2 border-[#D6D1C8] bg-white text-[#5F9C9C] placeholder-[#5F9C9C] shadow-none focus:outline-none focus:ring-0"
                 />
                 <Button
                   size="sm"
                   onClick={handleAddressSubmit}
-                  className="bg-emerald-500 text-white hover:bg-emerald-600 w-full"
+                  className="bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] w-full"
                 >
                   Save Location
                 </Button>

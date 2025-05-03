@@ -352,7 +352,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
         placeholder="Enter your address..."
         value={address}
         onChange={(e) => setAddress(e.target.value)}
-        className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        className="w-full p-3 rounded-lg border-2 border-[#D6D1C8] bg-white text-[#5F9C9C] placeholder-[#5F9C9C] shadow-none focus:outline-none focus:ring-0"
       />
       <Button
         size="sm"
@@ -360,7 +360,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
           await handleAddressSubmit();
           setIsPopoverOpen(false);
         }}
-        className="bg-emerald-500 text-white hover:bg-emerald-600 w-full"
+        className="bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] w-full"
       >
         Save Location
       </Button>
@@ -395,11 +395,15 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
                 <div className="aspect-square relative rounded-xl overflow-hidden">
                   <img
                     src={
-                      donation.image_url ||
-                      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
+                      donation.image_url?.startsWith("http")
+                        ? donation.image_url
+                        : "/default-image.png"
                     }
                     alt={donation.productName}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/default-image.png";
+                    }}
                   />
                   <div className="absolute top-2 right-2">
                     <span className="text-xs px-2 py-1 rounded-full bg-black/40 text-white">

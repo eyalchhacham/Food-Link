@@ -135,11 +135,11 @@ export default function LocationSetup({ user }: LocationSetupProps) {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Enter your address..."
-              className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full p-3 rounded-lg border-2 border-[#D6D1C8] bg-white text-[#5F9C9C] placeholder-[#5F9C9C] shadow-none focus:outline-none focus:ring-0"
             />
             <Button
               onClick={handleManualSubmit}
-              className="bg-[#6B9F9F] text-white hover:bg-[#5a8f8f] w-full"
+              className="bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] w-full"
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : "Save and Continue"}
