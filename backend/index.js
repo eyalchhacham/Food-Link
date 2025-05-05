@@ -70,21 +70,43 @@ app.post("/users", async (req, res) => {
   }
 });
 
-app.put("/users/:id", async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+app.post("/users", async (req, res) => {
+  const { email, password, name, phoneNumber } = req.body;
 
   try {
-    const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
-      data,
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Email is already in use" });
+    }
+
+    const newUser = await prisma.user.create({
+      data: { email, password, name, phoneNumber },
     });
-    res.json(updatedUser);
+
+    res.json(newUser);
   } catch (err) {
-    console.error("Error updating user:", err);
-    res.status(500).json({ error: "Error updating user" });
+    console.error("Error creating user:", err);
+    res.status(500).json({ error: "Error creating user" });
   }
 });
+
+
+// app.put("/users/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const data = req.body;
+
+//   try {
+//     const updatedUser = await prisma.user.update({
+//       where: { id: parseInt(id) },
+//       data,
+//     });
+//     res.json(updatedUser);
+//   } catch (err) {
+//     console.error("Error updating user:", err);
+//     res.status(500).json({ error: "Error updating user" });
+//   }
+// });
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
