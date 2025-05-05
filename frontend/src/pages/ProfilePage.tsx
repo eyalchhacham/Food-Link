@@ -1,4 +1,4 @@
-import { ChevronLeft, MapPin } from "lucide-react";
+import { ChevronLeft, MapPin, Home, Search, MessageCircle, User as IconUser, Plus } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { User } from "../App";
 import { useState, useEffect } from "react";
@@ -60,19 +60,21 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   };
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-screen bg-white">
+    <div className="max-w-[430px] mx-auto min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="p-4 flex items-center border-b">
-        <ChevronLeft
-          onClick={() => {
-            navigate("/home");
-          }}
-          className="w-6 h-6"
-        />
-        <h1 className="flex-1 text-center text-lg font-medium">Edit Profile</h1>
-      </div>
+      <header className="flex justify-between items-center px-4 pt-4 mb-6">
+        <button
+          onClick={() => navigate("/home")}
+          className="p-2 bg-white rounded-full shadow-md"
+        >
+          <ChevronLeft className="h-6 w-6 text-gray-700" />
+        </button>
+        <span className="font-medium text-gray-700 text-lg">Edit Profile</span>
+        <div className="w-6" /> {/* Placeholder for alignment */}
+      </header>
 
-      <div className="p-6">
+      {/* Main Content */}
+      <main className="px-4 pb-20">
         <h2 className="text-xl font-medium mb-6">
           Hello {newName ?? user.name}!
         </h2>
@@ -90,86 +92,112 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
             Edit profile image
           </button>
         </div>
+
         {message && (
           <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
             {message}
           </div>
         )}
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSaveChanges();
           }}
-          className="space-y-4"
+          className="space-y-6 bg-white p-6 rounded-lg shadow-sm"
         >
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Name:</label>
-              <input
-                type="text"
-                className="w-full p-2 bg-gray-100 rounded"
-                onChange={(e) => setName(e.target.value)}
-                defaultValue={user.name}
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Name:</label>
+            <input
+              type="text"
+              className="w-full p-2 bg-gray-100 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+              onChange={(e) => setName(e.target.value)}
+              defaultValue={user.name}
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Email:</label>
-              <input
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-                defaultValue={user.email}
-                className="w-full p-2 bg-gray-100 rounded"
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Email:</label>
+            <input
+              type="email"
+              onChange={(e) => setEmail(e.target.value)}
+              defaultValue={user.email}
+              className="w-full p-2 bg-gray-100 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Phone number:
-              </label>
-              <input
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                defaultValue={user.phoneNumber}
-                type="tel"
-                className="w-full p-2 bg-gray-100 rounded"
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Phone number:
+            </label>
+            <input
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              defaultValue={user.phoneNumber}
+              type="tel"
+              className="w-full p-2 bg-gray-100 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+            />
+          </div>
 
-            {/* Location Section */}
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Your location:
-              </label>
-              <div className="relative w-full h-[200px] bg-gray-100 rounded overflow-hidden">
-                <div className="absolute inset-0">
-                  <iframe
-                    title="Location Map"
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${
-                      userLocation.lng - 0.01
-                    },${userLocation.lat - 0.01},${userLocation.lng + 0.01},${
-                      userLocation.lat + 0.01
-                    }&layer=mapnik`}
-                    className="filter grayscale"
-                  ></iframe>
-                </div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <MapPin className="w-8 h-8 text-purple-600 fill-current" />
-                </div>
+          {/* Location Section */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Your location:
+            </label>
+            <div className="relative w-full h-[200px] bg-gray-100 rounded overflow-hidden">
+              <div className="absolute inset-0">
+                <iframe
+                  title="Location Map"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+                    userLocation.lng - 0.01
+                  },${userLocation.lat - 0.01},${userLocation.lng + 0.01},${
+                    userLocation.lat + 0.01
+                  }&layer=mapnik`}
+                  className="filter grayscale"
+                ></iframe>
+              </div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <MapPin className="w-8 h-8 text-purple-600 fill-current" />
               </div>
             </div>
+          </div>
 
+          <button
+            type="submit"
+            className="w-full py-3 bg-emerald-600 text-white rounded-lg shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+          >
+            Save Changes
+          </button>
+        </form>
+      </main>
+
+      {/* Footer */}
+      <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[430px] bg-white border-t shadow-sm z-50">
+        <div className="relative flex justify-between items-center px-6 py-3">
+          <button className="p-2 text-[#6B9F9F]" onClick={() => navigate("/home", { replace: true })}>
+            <Home className="h-6 w-6" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] mr-8" onClick={() => navigate("/search-donation")}>
+            <Search className="h-6 w-6" />
+          </button>
+          <div className="absolute left-1/2 transform -translate-x-1/2 -top-5 z-10">
             <button
-              type="submit"
-              className="w-full py-3 bg-gray-200 rounded-lg mt-8"
+              onClick={() => navigate("/upload-food")}
+              className="bg-[#6B9F9F] text-white w-14 h-14 rounded-full shadow-md flex items-center justify-center"
             >
-              save changes
+              <Plus className="w-6 h-6" />
             </button>
           </div>
-        </form>
-      </div>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8" onClick={() => navigate("/messages")}>
+            <MessageCircle className="h-6 w-6" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile")}>
+            <IconUser className="h-6 w-6" />
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
