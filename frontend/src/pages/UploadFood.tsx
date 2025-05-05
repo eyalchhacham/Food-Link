@@ -64,15 +64,28 @@ export default function UploadFood({ user }: { user: User | null }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!isAddressVerified) {
       alert("Please verify the address before submitting.");
       return;
     }
-
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to ensure only the date is compared
+  
+    if (pickupDate && pickupDate < today) {
+      alert("The pickup date cannot be in the past. Please select a valid date.");
+      return;
+    }
+  
+    if (expirationDate && expirationDate < today) {
+      alert("The expiration date cannot be in the past. Please select a valid date.");
+      return;
+    }
+  
     setIsLoading(true);
     setError("");
-
+  
     try {
       const formData = new FormData();
       formData.append("productName", productName);
@@ -86,18 +99,18 @@ export default function UploadFood({ user }: { user: User | null }) {
       formData.append("address", address);
       if (latitude !== null) formData.append("latitude", latitude.toString());
       if (longitude !== null) formData.append("longitude", longitude.toString());
-
+  
       if (images && images.length > 0) {
         formData.append("image", images[0]);
       }
-
+  
       const response = await fetch("http://localhost:3000/food-donation", {
         method: "POST",
         body: formData,
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.message || "Food donation failed");
       }
@@ -108,7 +121,7 @@ export default function UploadFood({ user }: { user: User | null }) {
       setIsLoading(false);
     }
   };
-
+  
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImages(e.target.files);
