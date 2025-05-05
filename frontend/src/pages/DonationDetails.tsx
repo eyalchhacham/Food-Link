@@ -9,6 +9,11 @@ import {
   MessageSquare,
   Minus,
   Plus,
+  Home,
+  Search,
+  MessageCircle,
+  User,
+  Plus as AddIcon,
 } from "lucide-react";
 
 export default function DonationDetails() {
@@ -38,22 +43,28 @@ export default function DonationDetails() {
       </div>
     );
   }
-  
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="relative">
+    <div className="max-w-[430px] mx-auto min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="flex justify-between items-center px-4 pt-4 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 z-10 p-2 bg-white rounded-full shadow-md"
+          className="p-2 bg-white rounded-full shadow-md"
         >
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
-        <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px]">
+        <span className="font-medium text-gray-700 text-lg">Donation Details</span>
+        <div className="w-6" /> {/* Placeholder for alignment */}
+      </header>
+
+      {/* Main Content */}
+      <main className="px-4 pb-20">
+        <div className="relative w-full h-[300px] rounded-lg overflow-hidden mb-6">
           <img
             src={donation.image_url || "https://via.placeholder.com/150"}
             alt={donation.productName}
-            className="w-full h-full object-contain" // שימוש ב-object-contain כדי למנוע חיתוך
+            className="w-full h-full object-cover"
           />
           {!donation.image_url && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 text-white text-lg font-bold">
@@ -61,27 +72,25 @@ export default function DonationDetails() {
             </div>
           )}
         </div>
-      </div>
 
-      <div className="px-4 py-6">
-        <h1 className="text-2xl font-bold mb-2">{donation.productName}</h1>
+        <h1 className="text-2xl font-bold mb-4">{donation.productName}</h1>
 
-        <div className="flex items-center space-x-2 text-gray-600 mb-2">
-          <Clock className="h-5 w-5" />
-          <span>{donation.pickupHours || "09:30 AM-08:30 PM"}</span>
+        <div className="space-y-2 text-gray-600 mb-6">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5" />
+            <span>{donation.pickupHours || "09:30 AM - 08:30 PM"}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="h-5 w-5" />
+            <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <MapPin className="h-5 w-5" />
+            <span>{donation.address || "Unknown address"}</span>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2 text-gray-600 mb-2">
-          <Calendar className="h-5 w-5" />
-          <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
-        </div>
-
-        <div className="flex items-center space-x-2 text-gray-600 mb-2">
-          <MapPin className="h-5 w-5" />
-          <span>{donation.address || "Unknown address"}</span>
-        </div>
-
-        <div className="border-t border-b py-4 my-6">
+        <div className="border-t border-b py-4 mb-6">
           <p className="text-gray-700">{donation.description}</p>
           {donation.dietary_notes && (
             <p className="mt-2 text-gray-600">Note: {donation.dietary_notes}</p>
@@ -109,7 +118,33 @@ export default function DonationDetails() {
             </button>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[430px] bg-white border-t shadow-sm z-50">
+        <div className="relative flex justify-between items-center px-6 py-3">
+          <button className="p-2 text-[#6B9F9F]" onClick={() => navigate("/home", { replace: true })}>
+            <Home className="h-6 w-6" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] mr-8" onClick={() => navigate("/search-donation")}>
+            <Search className="h-6 w-6" />
+          </button>
+          <div className="absolute left-1/2 transform -translate-x-1/2 -top-5 z-10">
+            <button
+              onClick={() => navigate("/upload-food")}
+              className="bg-[#6B9F9F] text-white w-14 h-14 rounded-full shadow-md flex items-center justify-center"
+            >
+              <AddIcon className="w-6 h-6" />
+            </button>
+          </div>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8" onClick={() => navigate("/messages")}>
+            <MessageCircle className="h-6 w-6" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile")}>
+            <User className="h-6 w-6" />
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
