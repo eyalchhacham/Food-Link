@@ -76,19 +76,35 @@ export default function DonationDetails() {
         <h1 className="text-2xl font-bold mb-4">{donation.productName}</h1>
 
         <div className="space-y-2 text-gray-600 mb-6">
-          <div className="flex items-center space-x-2">
-            <Clock className="h-5 w-5" />
-            <span>{donation.pickupHours || "09:30 AM - 08:30 PM"}</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5" />
-            <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-5 w-5" />
-            <span>{donation.address || "Unknown address"}</span>
-          </div>
-        </div>
+  <div className="flex items-center space-x-2">
+    <Clock className="h-5 w-5" />
+    <span>
+      {donation.pickupHours
+        ? `${donation.pickupHours} (${(() => {
+            switch (donation.pickupHours) {
+              case "morning":
+                return "08:00 AM - 12:00 PM";
+              case "afternoon":
+                return "12:00 PM - 05:00 PM";
+              case "evening":
+                return "05:00 PM - 09:00 PM";
+              default:
+                return "09:30 AM - 08:30 PM";
+            }
+          })()})`
+        : "09:30 AM - 08:30 PM"}
+    </span>
+  </div>
+  <div className="flex items-center space-x-2">
+    <Calendar className="h-5 w-5" />
+    <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
+  </div>
+  <div className="flex items-center space-x-2">
+    <MapPin className="h-5 w-5" />
+    <span>{donation.address || "Unknown address"}</span>
+  </div>
+</div>
+
 
         <div className="border-t border-b py-4 mb-6">
           <p className="text-gray-700">{donation.description}</p>
