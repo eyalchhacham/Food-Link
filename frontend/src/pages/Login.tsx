@@ -89,37 +89,45 @@ export default function Login({ setUser }: { setUser: (user: User) => void }) {
           Enter your email to sign up for this app
         </p>
   
-        <form onSubmit={handleSubmit} className="w-full px-4 flex flex-col gap-3">
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="user_name@ac.il"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2c7063]"
-          />
-  
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2c7063]"
-          />
-  
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#5d9b94] hover:bg-[#4b867e] text-white py-2 rounded-md font-medium"
-          >
-            {isLoading ? "Signing up..." : "Sign up with email"}
-          </button>
-        </form>
+        
+<form onSubmit={handleSubmit} className="w-full px-4 flex flex-col gap-3">
+  {error && (
+    <div className="text-red-500 text-sm text-center mb-2">
+      {error}
+    </div>
+  )}
+  <input
+    type="email"
+    id="email"
+    name="email"
+    placeholder="user_name@ac.il"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    required
+    className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2c7063]"
+  />
+
+  <input
+    type="password"
+    id="password"
+    name="password"
+    placeholder="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+    className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2c7063]"
+  />
+
+  <button
+    type="submit"
+    disabled={isLoading}
+    className="w-full bg-[#5d9b94] hover:bg-[#4b867e] text-white py-2 rounded-md font-medium"
+  >
+    {isLoading ? "Signing up..." : "Sign in with email"}
+  </button>
+</form>
+
+
   
         <div className="flex items-center my-4 w-full px-4">
           <div className="flex-grow border-t border-gray-300"></div>

@@ -161,7 +161,7 @@ export default function UploadFood({ user }: { user: UserType | null }) {
               {imagePreviews.length === 0 ? (
                 <div className="text-center">
                   <ImagePlus className="w-8 h-8 mx-auto text-gray-400" />
-                  <span className="mt-2 block text-sm text-gray-500">Add Photos</span>
+                  <span className="mt-2 block text-sm text-gray-500">Add Photo</span>
                 </div>
               ) : (
                 <div className="absolute inset-0 overflow-hidden rounded-lg">

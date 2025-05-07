@@ -14,8 +14,7 @@ const storage = new Storage({
 });
 const { getCoordinates } = require("./Services/geolocationService"); // Import the geolocation service
 const { getAddressFromCoordinates } = require("./Services/geolocationService");
-// Assumes GOOGLE_APPLICATION_CREDENTIALS is set
-const bucketName = "foodlink-uploads"; // Replace with your Google Cloud Storage bucket name
+const bucketName = "foodlink-uploads"; 
 const { loginWithGoogle } = require("./Services/googleLoginService"); //  googleLoginService.js מייבא את 
 
 app.use(express.json());
@@ -56,19 +55,6 @@ app.post("/login/google", async (req, res) => {
 });
 
 
-
-// app.post("/users", async (req, res) => {
-//   const data = req.body;
-
-//   try {
-//     const user = await prisma.user.create({
-//       data,
-//     });
-//     res.json(user);
-//   } catch (err) {
-//     res.status(500).json({ error: "Error creating user" });
-//   }
-// });
 
 app.post("/users", async (req, res) => {
   const { email, password, name, phoneNumber } = req.body;
