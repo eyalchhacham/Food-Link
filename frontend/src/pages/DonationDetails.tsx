@@ -36,6 +36,11 @@ export default function DonationDetails() {
     fetchDonation();
   }, [id]);
 
+  const handleClaim = () => {
+    // Logic for claiming the donation
+    console.log(`Claiming ${amount} of ${donation.productName}`);
+  };
+
   if (!donation) {
     return (
       <div className="min-h-screen flex justify-center items-center">
@@ -113,10 +118,12 @@ export default function DonationDetails() {
         </div>
 
         <div className="flex items-center justify-between">
-          <button className="flex-1 bg-gray-200 py-3 rounded-lg flex items-center justify-center space-x-2">
+          {/* Send Message Button */}
+          <button className="flex-1 bg-gray-200 py-3 rounded-lg flex items-center justify-center">
             <MessageSquare className="h-5 w-5" />
-            <span>Send Message</span>
           </button>
+
+          {/* Quantity Controls */}
           <div className="flex-1 ml-4 flex items-center justify-between bg-gray-100 rounded-lg px-4 py-2">
             <button
               onClick={() => setAmount((a) => Math.max(1, a - 1))} // Decrease amount, minimum is 1
@@ -132,6 +139,14 @@ export default function DonationDetails() {
               <Plus className="h-5 w-5" />
             </button>
           </div>
+
+          {/* Claim Button */}
+          <button
+            onClick={handleClaim}
+            className="flex-1 ml-4 bg-[#6B9F9F] text-white py-3 rounded-lg shadow-md hover:bg-[#5A8F8F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B9F9F]"
+          >
+            Claim
+          </button>
         </div>
       </main>
 
