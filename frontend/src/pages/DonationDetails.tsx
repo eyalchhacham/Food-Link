@@ -20,7 +20,7 @@ export default function DonationDetails() {
   const { id } = useParams(); // Get the donation ID from the URL
   const navigate = useNavigate();
   const [donation, setDonation] = useState<any>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [amount, setAmount] = useState(1); // Use "amount" instead of "quantity"
 
   useEffect(() => {
     const fetchDonation = async () => {
@@ -76,35 +76,34 @@ export default function DonationDetails() {
         <h1 className="text-2xl font-bold mb-4">{donation.productName}</h1>
 
         <div className="space-y-2 text-gray-600 mb-6">
-  <div className="flex items-center space-x-2">
-    <Clock className="h-5 w-5" />
-    <span>
-      {donation.pickupHours
-        ? `${donation.pickupHours} (${(() => {
-            switch (donation.pickupHours) {
-              case "morning":
-                return "08:00 AM - 12:00 PM";
-              case "afternoon":
-                return "12:00 PM - 05:00 PM";
-              case "evening":
-                return "05:00 PM - 09:00 PM";
-              default:
-                return "09:30 AM - 08:30 PM";
-            }
-          })()})`
-        : "09:30 AM - 08:30 PM"}
-    </span>
-  </div>
-  <div className="flex items-center space-x-2">
-    <Calendar className="h-5 w-5" />
-    <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
-  </div>
-  <div className="flex items-center space-x-2">
-    <MapPin className="h-5 w-5" />
-    <span>{donation.address || "Unknown address"}</span>
-  </div>
-</div>
-
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5" />
+            <span>
+              {donation.pickupHours
+                ? `${donation.pickupHours} (${(() => {
+                    switch (donation.pickupHours) {
+                      case "morning":
+                        return "08:00 AM - 12:00 PM";
+                      case "afternoon":
+                        return "12:00 PM - 05:00 PM";
+                      case "evening":
+                        return "05:00 PM - 09:00 PM";
+                      default:
+                        return "09:30 AM - 08:30 PM";
+                    }
+                  })()})`
+                : "09:30 AM - 08:30 PM"}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="h-5 w-5" />
+            <span>{new Date(donation.expirationDate).toLocaleDateString()}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <MapPin className="h-5 w-5" />
+            <span>{donation.address || "Unknown address"}</span>
+          </div>
+        </div>
 
         <div className="border-t border-b py-4 mb-6">
           <p className="text-gray-700">{donation.description}</p>
@@ -120,14 +119,14 @@ export default function DonationDetails() {
           </button>
           <div className="flex-1 ml-4 flex items-center justify-between bg-gray-100 rounded-lg px-4 py-2">
             <button
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              onClick={() => setAmount((a) => Math.max(1, a - 1))} // Decrease amount, minimum is 1
               className="p-1"
             >
               <Minus className="h-5 w-5" />
             </button>
-            <span className="font-medium">{quantity}</span>
+            <span className="font-medium">{amount}</span>
             <button
-              onClick={() => setQuantity((q) => q + 1)}
+              onClick={() => setAmount((a) => Math.min(donation.amount, a + 1))} // Limit to donation.amount
               className="p-1"
             >
               <Plus className="h-5 w-5" />
