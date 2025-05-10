@@ -16,6 +16,8 @@ export type User = {
   email: string;
   name: string;
   phoneNumber: string;
+  image_url: string;
+  
 };
 
 export interface Donation {

@@ -14,6 +14,7 @@ model User {
   email        String         @unique
   name         String
   phoneNumber  String         @map("phone_number")
+  image_url    String?        @map("image_url")
   locations UserLocation[]
   FoodDonation FoodDonation[]
 }

@@ -388,3 +388,67 @@ app.get("/user-location/:userId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// Add this endpoint to handle user profile photo uploads
+app.post("/upload-profile-image", upload.single("image"), async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    let imageUrl = null;
+
+    // Upload image to Google Cloud Storage if an image is provided
+    if (req.file) {
+      const blob = storage
+        .bucket(bucketName)
+        .file(`${uuidv4()}-${req.file.originalname}`);
+
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+        metadata: {
+          contentType: req.file.mimetype,
+        },
+      });
+
+      blobStream.on("error", (err) => {
+        console.error("Error uploading to GCS:", err);
+        res
+          .status(500)
+          .json({ error: "Error uploading image to Google Cloud Storage" });
+      });
+
+      blobStream.on("finish", async () => {
+        try {
+          // Make the file public
+          await blob.makePublic();
+          console.log("Image uploaded and made public!");
+
+          imageUrl = `https://storage.googleapis.com/${bucketName}/${blob.name}`;
+
+          // Update the user's profile image URL in the database
+          const updatedUser = await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: { image_url: imageUrl },
+          });
+
+          res.json({
+            message: "Profile image uploaded successfully",
+            imageUrl,
+            user: updatedUser,
+          });
+        } catch (err) {
+          console.error("Error making file public or updating user:", err);
+          res
+            .status(500)
+            .json({ error: "Error finalizing image upload or updating user" });
+        }
+      });
+
+      blobStream.end(req.file.buffer);
+    } else {
+      res.status(400).json({ error: "No image file provided" });
+    }
+  } catch (err) {
+    console.error("Error uploading profile image:", err);
+    res.status(500).json({ error: "Error uploading profile image" });
+  }
+});

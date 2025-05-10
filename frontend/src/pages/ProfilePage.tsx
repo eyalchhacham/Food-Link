@@ -18,6 +18,10 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   const [newAddress, setNewAddress] = useState("");
   const [isEditingLocation, setIsEditingLocation] = useState(false);
 
+  // State for profile image
+  const [profileImage, setProfileImage] = useState(user?.image_url || "https://images.unsplash.com/photo-1502759683299-cdcd6974244f?auto=format&fit=crop&w=200&h=200");
+  const [isUploading, setIsUploading] = useState(false);
+
   // Fetch user data if not available in location.state
   useEffect(() => {
     const fetchUser = async () => {
@@ -25,10 +29,12 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
         try {
           const response = await fetch(`http://localhost:3000/users/${location.state?.userId || 1}`); // Replace `1` with a fallback user ID or logic
           const data = await response.json();
+          console.log("Fetched user data:", data);
           setUserState(data);
           setName(data.name);
           setEmail(data.email);
           setPhoneNumber(data.phoneNumber);
+          setProfileImage(data.image_url || "https://images.unsplash.com/photo-1502759683299-cdcd6974244f?auto=format&fit=crop&w=200&h=200");
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
@@ -83,56 +89,86 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   };
 
   const handleUpdateLocation = async () => {
-  if (!newAddress) {
-    setMessage("Please enter a valid address.");
-    return;
-  }
-
-  if (!user) {
-    setMessage("User information is missing. Please refresh the page.");
-    return;
-  }
-
-  try {
-    // Fetch coordinates for the new address
-    const response = await fetch("http://localhost:3000/api/geolocation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ address: newAddress }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to fetch coordinates");
+    if (!newAddress) {
+      setMessage("Please enter a valid address.");
+      return;
     }
 
-    const { latitude, longitude } = data;
+    if (!user) {
+      setMessage("User information is missing. Please refresh the page.");
+      return;
+    }
 
-    // Update the user's location in the database
-    await fetch("http://localhost:3000/user-location", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user.id, // Ensure user is not null before accessing user.id
-        latitude,
-        longitude,
-        address: newAddress,
-      }),
-    });
+    try {
+      // Fetch coordinates for the new address
+      const response = await fetch("http://localhost:3000/api/geolocation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ address: newAddress }),
+      });
 
-    setUserLocation({ lat: latitude, lng: longitude });
-    setMessage("Location updated successfully!");
-    setIsEditingLocation(false);
-  } catch (error) {
-    console.error("Error updating location:", error);
-    setMessage("Error updating location. Please try again.");
-  }
-};;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch coordinates");
+      }
+
+      const { latitude, longitude } = data;
+
+      // Update the user's location in the database
+      await fetch("http://localhost:3000/user-location", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id, // Ensure user is not null before accessing user.id
+          latitude,
+          longitude,
+          address: newAddress,
+        }),
+      });
+
+      setUserLocation({ lat: latitude, lng: longitude });
+      setMessage("Location updated successfully!");
+      setIsEditingLocation(false);
+    } catch (error) {
+      console.error("Error updating location:", error);
+      setMessage("Error updating location. Please try again.");
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("userId", user?.id.toString() || "");
+
+    try {
+      setIsUploading(true);
+      const response = await fetch("http://localhost:3000/upload-profile-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const data = await response.json();
+      setProfileImage(data.imageUrl); // Update the profile image URL
+      setMessage("Profile image updated successfully!");
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      setMessage("Error uploading profile image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (!user) {
     return <div>Loading...</div>; // Show a loading state while fetching user data
@@ -162,14 +198,25 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
         <div className="flex flex-col items-center mb-8">
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1502759683299-cdcd6974244f?auto=format&fit=crop&w=200&h=200"
+              src={profileImage}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover"
             />
+            <label
+              htmlFor="profileImageUpload"
+              className="absolute bottom-0 right-0 bg-[#6B9F9F] text-white p-2 rounded-full shadow-md cursor-pointer hover:bg-[#5A8F8F]"
+            >
+              <Edit3 className="w-4 h-4" />
+            </label>
+            <input
+              id="profileImageUpload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
           </div>
-          <button className="mt-2 text-teal-600 text-sm">
-            Edit profile image
-          </button>
+          {isUploading && <p className="text-sm text-gray-500 mt-2">Uploading...</p>}
         </div>
 
         {message && (
