@@ -1,4 +1,4 @@
-import { ChevronLeft, MapPin, Home, Search, MessageCircle, User as IconUser, Plus } from "lucide-react";
+import { ChevronLeft, MapPin, Home, Search, MessageCircle, User as IconUser, Plus, Edit3 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { User } from "../App";
 import { useState, useEffect } from "react";
@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = location.state?.user as User;
+  const [user, setUserState] = useState<User | null>(location.state?.user || null);
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || "");
@@ -14,24 +14,48 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   const [newName, setNewName] = useState(null);
 
   // State for user location
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number }>({
-    lat: 32.0853, // Default latitude (Tel Aviv)
-    lng: 34.7818, // Default longitude (Tel Aviv)
-  });
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [newAddress, setNewAddress] = useState("");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
 
-  // Fetch user's location
+  // Fetch user data if not available in location.state
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-      },
-      (error) => {
-        console.error("Error fetching location:", error);
-        // Keep the default location if geolocation fails
+    const fetchUser = async () => {
+      if (!user) {
+        try {
+          const response = await fetch(`http://localhost:3000/users/${location.state?.userId || 1}`); // Replace `1` with a fallback user ID or logic
+          const data = await response.json();
+          setUserState(data);
+          setName(data.name);
+          setEmail(data.email);
+          setPhoneNumber(data.phoneNumber);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
       }
-    );
-  }, []);
+    };
+
+    fetchUser();
+  }, [user, location.state]);
+
+  // Fetch user's location from the database
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`http://localhost:3000/user-location/${user.id}`);
+          const data = await response.json();
+          if (data.latitude && data.longitude) {
+            setUserLocation({ lat: data.latitude, lng: data.longitude });
+          }
+        } catch (error) {
+          console.error("Error fetching user location:", error);
+        }
+      }
+    };
+
+    fetchUserLocation();
+  }, [user]);
 
   const handleSaveChanges = async () => {
     if (!user) return;
@@ -52,12 +76,67 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
       setUser(updatedUser);
       setNewName(updatedUser.name);
       setMessage("Profile updated successfully!");
-      console.log("Updated user:", updatedUser);
     } catch (error) {
       console.error("Error updating profile:", error);
       setMessage("Error updating profile. Please try again.");
     }
   };
+
+  const handleUpdateLocation = async () => {
+  if (!newAddress) {
+    setMessage("Please enter a valid address.");
+    return;
+  }
+
+  if (!user) {
+    setMessage("User information is missing. Please refresh the page.");
+    return;
+  }
+
+  try {
+    // Fetch coordinates for the new address
+    const response = await fetch("http://localhost:3000/api/geolocation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ address: newAddress }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch coordinates");
+    }
+
+    const { latitude, longitude } = data;
+
+    // Update the user's location in the database
+    await fetch("http://localhost:3000/user-location", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user.id, // Ensure user is not null before accessing user.id
+        latitude,
+        longitude,
+        address: newAddress,
+      }),
+    });
+
+    setUserLocation({ lat: latitude, lng: longitude });
+    setMessage("Location updated successfully!");
+    setIsEditingLocation(false);
+  } catch (error) {
+    console.error("Error updating location:", error);
+    setMessage("Error updating location. Please try again.");
+  }
+};;
+
+  if (!user) {
+    return <div>Loading...</div>; // Show a loading state while fetching user data
+  }
 
   return (
     <div className="max-w-[430px] mx-auto min-h-screen bg-gray-50">
@@ -144,7 +223,7 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
               Your location:
             </label>
             <div className="relative w-full h-[200px] bg-gray-100 rounded overflow-hidden">
-              <div className="absolute inset-0">
+              {userLocation ? (
                 <iframe
                   title="Location Map"
                   width="100%"
@@ -157,16 +236,45 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
                   }&layer=mapnik`}
                   className="filter grayscale"
                 ></iframe>
-              </div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <MapPin className="w-8 h-8 text-purple-600 fill-current" />
-              </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">Loading map...</p>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsEditingLocation(true)}
+                className="absolute top-2 right-2 bg-[#6B9F9F] text-white p-2 rounded-full shadow-md hover:bg-[#5A8F8F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B9F9F]"
+              >
+                <Edit3 className="w-4 h-4" />
+              </button>
             </div>
+            {isEditingLocation && (
+              <div className="mt-4">
+                <label className="block text-sm text-gray-600 mb-1">
+                  Enter new address:
+                </label>
+                <input
+                  type="text"
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                  className="w-full p-2 bg-gray-100 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                  placeholder="Enter new address"
+                />
+                <button
+                  type="button"
+                  onClick={handleUpdateLocation}
+                  className="mt-2 w-full py-2 bg-[#6B9F9F] text-white rounded-lg shadow-sm hover:bg-[#5A8F8F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B9F9F]"
+                >
+                  Update Location
+                </button>
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-emerald-600 text-white rounded-lg shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+            className="w-full py-3 bg-[#6B9F9F] text-white rounded-lg shadow-sm hover:bg-[#5A8F8F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B9F9F]"
           >
             Save Changes
           </button>
