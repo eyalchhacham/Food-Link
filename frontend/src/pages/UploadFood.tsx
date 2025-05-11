@@ -150,7 +150,7 @@ export default function UploadFood({ user }: { user: UserType | null }) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Image Upload Section */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors relative">
+            <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors relative w-full h-60"> {/* הגדלתי את ה-w וה-h */}
               <input
                 type="file"
                 accept="image/*"
@@ -303,13 +303,13 @@ export default function UploadFood({ user }: { user: UserType | null }) {
                 placeholder="Enter the address"
                 required
               />
-              <button
-                type="button"
-                onClick={validateAddress}
-                className="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-              >
-                Validate Address
-              </button>
+          <button
+            type="button"
+            onClick={validateAddress}
+            className="mt-2 px-4 py-2 bg-[#6B9F9F] text-white rounded-md shadow-sm hover:bg-[#5A8F8F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B9F9F]"
+ >
+            Validate Address
+          </button> 
               {latitude && longitude && (
                 <p className="text-sm text-gray-500 mt-1">
                   Latitude: {latitude}, Longitude: {longitude}
@@ -319,13 +319,13 @@ export default function UploadFood({ user }: { user: UserType | null }) {
           </div>
 
           <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Uploading..." : "Submit"}
-            </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-[#6B9F9F] hover:bg-[#5A8F8F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B9F9F] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Uploading..." : "Submit"}
+          </button>
           </div>
         </form>
       </main>
