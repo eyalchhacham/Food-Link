@@ -22,6 +22,12 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   const [profileImage, setProfileImage] = useState(user?.image_url || "https://images.unsplash.com/photo-1502759683299-cdcd6974244f?auto=format&fit=crop&w=200&h=200");
   const [isUploading, setIsUploading] = useState(false);
 
+  useEffect(() => {
+  if (user) {
+    handleSaveChanges(); // קורא לפונקציה מיד אחרי שהנתונים נטענים
+  }
+}, [user]); // תלות ב-user כדי לבצע עדכון אחרי טעינת המשתמש
+
   // Fetch user data if not available in location.state
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,6 +41,7 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
           setEmail(data.email);
           setPhoneNumber(data.phoneNumber);
           setProfileImage(data.image_url || "https://images.unsplash.com/photo-1502759683299-cdcd6974244f?auto=format&fit=crop&w=200&h=200");
+          
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
@@ -43,6 +50,14 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
 
     fetchUser();
   }, [user, location.state]);
+
+  useEffect(() => {
+    if (user?.image_url) {
+      setProfileImage(user.image_url);
+      
+    }
+  }, [user]);
+  
 
   // Fetch user's location from the database
   useEffect(() => {
@@ -80,8 +95,9 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
 
       const updatedUser = await response.json();
       setUser(updatedUser);
+      setProfileImage(updatedUser.image_url); // שומר את קישור התמונה
       setNewName(updatedUser.name);
-      setMessage("Profile updated successfully!");
+      
     } catch (error) {
       console.error("Error updating profile:", error);
       setMessage("Error updating profile. Please try again.");
@@ -162,6 +178,7 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
       const data = await response.json();
       setProfileImage(data.imageUrl); // Update the profile image URL
       setMessage("Profile image updated successfully!");
+    
     } catch (error) {
       console.error("Error uploading profile image:", error);
       setMessage("Error uploading profile image. Please try again.");
