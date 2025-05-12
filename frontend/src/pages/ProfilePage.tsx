@@ -79,30 +79,32 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
   }, [user]);
 
   const handleSaveChanges = async () => {
-    if (!user) return;
+  if (!user) return;
 
-    try {
-      const response = await fetch(`http://localhost:3000/users/${user.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, phoneNumber }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update user");
-      }
-
-      const updatedUser = await response.json();
-      setUser(updatedUser);
-      setProfileImage(updatedUser.image_url); // שומר את קישור התמונה
-      setNewName(updatedUser.name);
-      
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      setMessage("Error updating profile. Please try again.");
+  try {
+    const response = await fetch(`http://localhost:3000/users/${user.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, email, phoneNumber }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update user");
     }
-  };
+
+    const updatedUser = await response.json();
+    setUser(updatedUser);
+    setProfileImage(
+      updatedUser.image_url || "https://images.unsplash.com/photo-1502759683299-cdcd6974244f?auto=format&fit=crop&w=200&h=200"
+    ); // Use default image if image_url is null
+    setNewName(updatedUser.name);
+
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    setMessage("Error updating profile. Please try again.");
+  }
+};
 
   const handleUpdateLocation = async () => {
     if (!newAddress) {
