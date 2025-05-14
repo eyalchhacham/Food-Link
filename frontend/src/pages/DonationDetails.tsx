@@ -119,7 +119,12 @@ export default function DonationDetails() {
 
         <div className="flex items-center justify-between">
           {/* Send Message Button */}
-          <button className="flex-1 bg-gray-200 py-3 rounded-lg flex items-center justify-center">
+          <button
+            className="flex-1 bg-gray-200 py-3 rounded-lg flex items-center justify-center"
+            onClick={() =>
+             navigate(`/chat/${donation.userId}?donationId=${donation.id}`)
+         }
+       >
             <MessageSquare className="h-5 w-5" />
           </button>
 

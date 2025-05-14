@@ -10,6 +10,7 @@ import SearchResults from "./pages/SearchResults";
 import DonationDetails from "./pages/DonationDetails"; 
 import LocationSetup from "./pages/LocationSetup"; 
 import { GoogleOAuthProvider } from "@react-oauth/google"; // צריך להתקין npm install @react-oauth/google
+import ChatPage from "./pages/ChatPage";
 
 export type User = {
   id: string;
@@ -74,6 +75,7 @@ function App() {
         <Route path="/search-donation" element={<SearchDonation user={user} />} />
         <Route path="/search-results" element={<SearchResults />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
+        <Route path="/chat/:id" element={<ChatPage />} />
         <Route path="/upload-food" element={<UploadFood user={user} />} />
         <Route
           path="/my-profile"
