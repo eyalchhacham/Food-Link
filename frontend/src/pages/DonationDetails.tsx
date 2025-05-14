@@ -21,6 +21,7 @@ export default function DonationDetails() {
   const navigate = useNavigate();
   const [donation, setDonation] = useState<any>(null);
   const [amount, setAmount] = useState(1); // Use "amount" instead of "quantity"
+  const currentUser = { id: 1 }; // Replace with actual current user ID from your auth system
 
   useEffect(() => {
     const fetchDonation = async () => {
@@ -36,9 +37,34 @@ export default function DonationDetails() {
     fetchDonation();
   }, [id]);
 
-  const handleClaim = () => {
-    // Logic for claiming the donation
-    console.log(`Claiming ${amount} of ${donation.productName}`);
+  const handleClaim = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/claim-donation/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: currentUser.id }), // Pass the current user's ID
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to claim donation");
+      }
+
+      const data = await response.json();
+      alert(data.message);
+
+      // Optionally, navigate back or refresh the page
+      navigate("/home");
+    } catch (error) {
+      console.error("Error claiming donation:", error);
+      if (error instanceof Error) {
+        alert(error.message || "Failed to claim donation. Please try again.");
+      } else {
+        alert("Failed to claim donation. Please try again.");
+      }
+    }
   };
 
   if (!donation) {
@@ -122,9 +148,9 @@ export default function DonationDetails() {
           <button
             className="flex-1 bg-gray-200 py-3 rounded-lg flex items-center justify-center"
             onClick={() =>
-             navigate(`/chat/${donation.userId}?donationId=${donation.id}`)
-         }
-       >
+              navigate(`/chat/${donation.userId}?donationId=${donation.id}`)
+            }
+          >
             <MessageSquare className="h-5 w-5" />
           </button>
 

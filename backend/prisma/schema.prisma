@@ -15,6 +15,7 @@ model User {
   name         String
   phoneNumber  String         @map("phone_number")
   image_url    String?        @map("image_url")
+  credit Int                  @default(0)
   locations UserLocation[]
   FoodDonation FoodDonation[]
   sentMessages     Message[] @relation("SentMessages")
@@ -49,7 +50,7 @@ model FoodDonation {
   pickupHours    String?        @map("pickup_hours")
   category       Category
   status         DonationStatus @default(available)
-  claimed_by     String?
+  claimed_by     Int?
   dietary_notes  String?
   userId         Int            @map("user_id")
   user           User           @relation(fields: [userId], references: [id])
