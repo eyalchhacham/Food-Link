@@ -516,3 +516,45 @@ app.post("/messages", async (req, res) => {
   }
 });
 
+app.post("/api/claim-donation/:id", async (req, res) => {
+  const { id } = req.params; // Donation ID
+  const { userId } = req.body; // Current user ID (the one claiming the donation)
+
+  try {
+    // Find the donation
+    const donation = await prisma.FoodDonation.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+
+    if (donation.status === "unavailable") {
+      return res.status(400).json({ message: "Donation is already claimed" });
+    }
+
+    // Update the donation to set claimedBy and status
+    await prisma.FoodDonation.update({
+      where: { id: parseInt(id) },
+      data: {
+        claimed_by: userId,
+        status: "claimed",
+      },
+    });
+
+    // Increment the credit of the user who created the donation
+    await prisma.user.update({
+      where: { id: donation.userId },
+      data: {
+        credit: { increment: 1 },
+      },
+    });
+
+    res.status(200).json({ message: "Donation claimed successfully!" });
+  } catch (error) {
+    console.error("Error claiming donation:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
