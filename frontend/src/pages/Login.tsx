@@ -32,7 +32,7 @@ export default function Login({ setUser }: { setUser: (user: User) => void }) {
         throw new Error(data.message || "Login failed");
       }
       setUser(data.user);
-
+      localStorage.setItem("userId", data.user.id.toString());
       navigate("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -60,6 +60,7 @@ export default function Login({ setUser }: { setUser: (user: User) => void }) {
         }
 
         setUser(data.user);
+        localStorage.setItem("userId", data.user.id.toString());
         navigate("/home");
       } catch (error) {
         console.error(error);

@@ -17,6 +17,9 @@ model User {
   image_url    String?        @map("image_url")
   locations UserLocation[]
   FoodDonation FoodDonation[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
 }
 
 model UserLocation {
@@ -52,6 +55,7 @@ model FoodDonation {
   user           User           @relation(fields: [userId], references: [id])
 
   @@map("food_donations")
+  messages Message[]
 }
 
 enum Unit {
@@ -104,4 +108,17 @@ enum Temperature {
   frozen
   refrigerated
   room_temperature
+}
+
+model Message {
+  id           Int       @id @default(autoincrement())
+  text         String
+  created_at   DateTime  @default(now())
+  from_user_id Int
+  to_user_id   Int
+  donation_id  Int
+
+  from_user    User      @relation("SentMessages", fields: [from_user_id], references: [id], onDelete: Cascade)
+  to_user      User      @relation("ReceivedMessages", fields: [to_user_id], references: [id], onDelete: Cascade)
+  donation     FoodDonation @relation(fields: [donation_id], references: [id], onDelete: Cascade)
 }

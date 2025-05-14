@@ -330,6 +330,23 @@ app.listen(3000, () => {
   console.log("Server running at http://localhost:3000");
 });
 
+app.get("/users/:id", async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(req.params.id) },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 app.post("/user-location", async (req, res) => {
   const { userId, latitude, longitude, address } = req.body;
 
@@ -452,3 +469,50 @@ app.post("/upload-profile-image", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "Error uploading profile image" });
   }
 });
+
+app.get("/messages/:donationId", async (req, res) => {
+  const { donationId } = req.params;
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        donation_id: parseInt(donationId),
+        OR: [
+          { from_user_id: parseInt(userId) },
+          { to_user_id: parseInt(userId) },
+        ],
+      },
+      orderBy: { created_at: "asc" },
+    });
+    res.json(messages);
+  } catch (err) {
+    console.error("Error fetching messages:", err);
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+
+app.post("/messages", async (req, res) => {
+  const { from_user_id, to_user_id, donation_id, text } = req.body;
+  try {
+    const message = await prisma.message.create({
+      data: {
+        from_user_id: parseInt(from_user_id),
+        to_user_id: parseInt(to_user_id),
+        donation_id: parseInt(donation_id),
+        text,
+      },
+    });
+    console.log("Created message:", message);
+    res.status(201).json(message);
+  } catch (err) {
+    console.error("Error sending message:", err);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+

@@ -54,6 +54,7 @@ export default function Signup({ setUser }: { setUser: (user: User) => void }) {
        throw new Error(data.message || "Registration failed");
      }
       setUser({ email, name, phoneNumber, id: data.id });
+      localStorage.setItem("userId", data.id.toString());
       navigate("/home");
     } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
