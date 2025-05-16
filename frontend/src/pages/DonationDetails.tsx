@@ -44,7 +44,7 @@ export default function DonationDetails() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: currentUser.id }), // Pass the current user's ID
+        body: JSON.stringify({ userId: currentUser.id,amount }), // Pass the current user's ID
       });
 
       if (!response.ok) {
