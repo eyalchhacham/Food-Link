@@ -518,11 +518,12 @@ app.post("/messages", async (req, res) => {
 
 app.post("/api/claim-donation/:id", async (req, res) => {
   const { id } = req.params; // Donation ID
-  const { userId } = req.body; // Current user ID (the one claiming the donation)
+  const { userId, amount } = req.body; // Current user ID and amount to claim
+  console.log("amount", amount);
 
   try {
     // Find the donation
-    const donation = await prisma.FoodDonation.findUnique({
+    const donation = await prisma.foodDonation.findUnique({
       where: { id: parseInt(id) },
     });
 
@@ -530,16 +531,25 @@ app.post("/api/claim-donation/:id", async (req, res) => {
       return res.status(404).json({ message: "Donation not found" });
     }
 
-    if (donation.status === "unavailable") {
-      return res.status(400).json({ message: "Donation is already claimed" });
+    if (donation.status === "unavailable" || donation.amount <= 0) {
+      return res.status(400).json({ message: "Donation is already claimed or unavailable" });
     }
 
-    // Update the donation to set claimedBy and status
-    await prisma.FoodDonation.update({
+    if (amount > donation.amount) {
+      return res.status(400).json({ message: "Not enough amount available" });
+    }
+
+    // Calculate new amount
+    const newAmount = donation.amount - amount;
+    console.log("New amount after claim:", newAmount);
+
+    // Update the donation: reduce amount, set claimed_by and status if needed
+    await prisma.foodDonation.update({
       where: { id: parseInt(id) },
       data: {
+        amount: newAmount,
         claimed_by: userId,
-        status: "claimed",
+        status: newAmount === 0 ? "claimed" : "available", // <-- This line does what you want
       },
     });
 
