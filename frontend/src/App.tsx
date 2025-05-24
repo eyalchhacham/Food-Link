@@ -75,7 +75,7 @@ function App() {
         />
         <Route path="/search-donation" element={<SearchDonation user={user} />} />
         <Route path="/search-results" element={<SearchResults />} />
-        <Route path="/donation-details/:id" element={<DonationDetails />} />
+        <Route path="/donation-details/:id" element={<DonationDetails user={user} />} />
         <Route path="/chat/:id" element={<ChatPage />} />
         <Route path="/upload-food" element={<UploadFood user={user} />} />
        <Route path="/user-chats" element={<UserChatsPage user={user} />} />
