@@ -214,7 +214,7 @@ export default function SearchDonation({ user }: SearchDonationProps) {
               <Plus className="w-6 h-6" />
             </button>
           </div>
-          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8" onClick={() => navigate("/messages")}>
+          <button className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8"  onClick={() => navigate("/user-chats")}>
             <MessageCircle className="h-6 w-6" />
           </button>
           <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile", { state: { user } })}>

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function ChatPage() {
   const navigate = useNavigate();
-  const { id: otherUserIdParam } = useParams(); // /chat/:id
+  const { id: otherUserIdParam } = useParams();
   const [otherUserId, setOtherUserId] = useState<number | null>(null);
   const [otherUserName, setOtherUserName] = useState("");
   const [otherUserImage, setOtherUserImage] = useState("");
@@ -17,14 +17,12 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
-  // 1. קובעת את המשתמש השני מתוך כתובת אם צריך
   useEffect(() => {
     if (!otherUserId && otherUserIdParam) {
       setOtherUserId(Number(otherUserIdParam));
     }
   }, [otherUserIdParam]);
 
-  // 2. טוענת את השם והתמונה של המשתמש השני (גם אם אין הודעות עדיין)
   useEffect(() => {
     const fetchOtherUserInfo = async () => {
       if (otherUserId) {
@@ -40,12 +38,10 @@ export default function ChatPage() {
     fetchOtherUserInfo();
   }, [otherUserId]);
 
-  // 3. טוען הודעות
   useEffect(() => {
     fetchMessages();
   }, [donationId]);
 
-  // 4. Supabase Realtime
   useEffect(() => {
     const channel = supabase
       .channel("chat-listener")
@@ -81,7 +77,6 @@ export default function ChatPage() {
       );
       setMessages(res.data);
 
-      // אם יש הודעות – נגזור מהן את המשתמש השני
       if (res.data.length > 0) {
         const first = res.data[0];
         const otherId =
@@ -116,7 +111,8 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="p-4 max-w-[430px] mx-auto h-screen flex flex-col bg-gray-50">
+    <div className="max-w-[430px] mx-auto h-screen flex flex-col bg-gray-50">
+      {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-300">
         <button onClick={() => navigate(-1)}>
           <ChevronLeft className="h-6 w-6 text-gray-700" />
@@ -129,7 +125,8 @@ export default function ChatPage() {
         <span className="font-semibold text-gray-800">{otherUserName}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      {/* Chat messages - with scroll */}
+      <div className="flex-1 overflow-y-auto px-4 py-2">
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -144,7 +141,8 @@ export default function ChatPage() {
         ))}
       </div>
 
-      <div className="flex mt-2">
+      {/* Message input */}
+      <div className="flex px-4 py-2 bg-white border-t border-gray-200">
         <input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}

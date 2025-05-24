@@ -516,6 +516,85 @@ app.post("/messages", async (req, res) => {
   }
 });
 
+
+app.get("/user-chats/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // שלב 1: הודעות קיימות
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { from_user_id: parseInt(userId) },
+          { to_user_id: parseInt(userId) },
+        ],
+      },
+      orderBy: { created_at: "desc" },
+      include: {
+        from_user: true,
+        to_user: true,
+      },
+    });
+
+    const chatMap = new Map();
+
+    messages.forEach((msg) => {
+      const otherUser =
+        msg.from_user_id === parseInt(userId) ? msg.to_user : msg.from_user;
+      const key = `${msg.donation_id}-${otherUser.id}`;
+
+      if (!chatMap.has(key)) {
+        chatMap.set(key, {
+          donationId: msg.donation_id,
+          otherUserId: otherUser.id,
+          otherUserName: otherUser.name,
+          otherUserImage: otherUser.image_url,
+          lastMessage: msg.text,
+          lastMessageTime: msg.created_at,
+        });
+      }
+    });
+
+    // שלב 2: תרומות שנעשו עליהן Claim ועדיין אין צ'אט
+    const claimedDonations = await prisma.foodDonation.findMany({
+      where: {
+        claimed_by: parseInt(userId),
+      },
+      include: {
+        user: true, // בעל התרומה
+      },
+    });
+
+    claimedDonations.forEach((donation) => {
+      const key = `${donation.id}-${donation.user.id}`;
+
+      // רק אם עדיין אין צ'אט קיים על התרומה הזאת
+      if (!chatMap.has(key)) {
+        chatMap.set(key, {
+          donationId: donation.id,
+          otherUserId: donation.user.id,
+          otherUserName: donation.user.name,
+          otherUserImage: donation.user.image_url,
+          lastMessage: "You claimed this donation. Start a conversation!",
+          lastMessageTime: donation.updatedAt || donation.createdAt,
+        });
+      }
+    });
+
+    // הפוך למערך ומיין לפי זמן
+    const chatArray = Array.from(chatMap.values()).sort(
+      (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
+    );
+
+    res.json(chatArray);
+  } catch (error) {
+    console.error("Error fetching user chats:", error);
+    res.status(500).json({ error: "Failed to load chats" });
+  }
+});
+
+
+
 app.post("/api/claim-donation/:id", async (req, res) => {
   const { id } = req.params; // Donation ID
   const { userId, amount } = req.body; // Current user ID and amount to claim
@@ -566,5 +645,6 @@ app.post("/api/claim-donation/:id", async (req, res) => {
     console.error("Error claiming donation:", error);
     res.status(500).json({ message: "Internal server error" });
   }
+
 });
 
