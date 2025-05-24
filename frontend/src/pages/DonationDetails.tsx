@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Spinner from "../components/ui/Spinner";
 import {
   ArrowLeft,
@@ -12,16 +12,35 @@ import {
   Home,
   Search,
   MessageCircle,
-  User,
+  User as UserIcon,
   Plus as AddIcon,
 } from "lucide-react";
+import { User } from "../App";
 
-export default function DonationDetails() {
-  const { id } = useParams(); // Get the donation ID from the URL
+interface DonationDetailsProps {
+  user: User | null;
+}
+
+const DonationDetails: React.FC<DonationDetailsProps> = ({ user: userProp }) => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [donation, setDonation] = useState<any>(null);
-  const [amount, setAmount] = useState(1); // Use "amount" instead of "quantity"
-  const currentUser = { id: 1 }; // Replace with actual current user ID from your auth system
+  const [amount, setAmount] = useState(1);
+
+  // Use user from prop, or from location.state, or fetch by userId if needed
+  const [user, setUser] = useState<User | null>(
+    userProp || (location.state as any)?.user || null
+  );
+
+  useEffect(() => {
+    if (!user && location.state?.userId) {
+      fetch(`http://localhost:3000/users/${location.state.userId}`)
+        .then(res => res.json())
+        .then(data => setUser(data))
+        .catch(err => console.error("Error fetching user data:", err));
+    }
+  }, [location.state, user]);
 
   useEffect(() => {
     const fetchDonation = async () => {
@@ -33,18 +52,21 @@ export default function DonationDetails() {
         console.error("Error fetching donation details:", error);
       }
     };
-
     fetchDonation();
   }, [id]);
 
   const handleClaim = async () => {
+    if (!user) {
+      alert("User not loaded. Please log in again.");
+      return;
+    }
     try {
       const response = await fetch(`http://localhost:3000/api/claim-donation/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: currentUser.id,amount }), // Pass the current user's ID
+        body: JSON.stringify({ userId: user.id, amount }),
       });
 
       if (!response.ok) {
@@ -54,8 +76,6 @@ export default function DonationDetails() {
 
       const data = await response.json();
       alert(data.message);
-
-      // Optionally, navigate back or refresh the page
       navigate("/home");
     } catch (error) {
       console.error("Error claiming donation:", error);
@@ -86,7 +106,7 @@ export default function DonationDetails() {
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </button>
         <span className="font-medium text-gray-700 text-lg">Donation Details</span>
-        <div className="w-6" /> {/* Placeholder for alignment */}
+        <div className="w-6" />
       </header>
 
       {/* Main Content */}
@@ -157,14 +177,14 @@ export default function DonationDetails() {
           {/* Quantity Controls */}
           <div className="flex-1 ml-4 flex items-center justify-between bg-gray-100 rounded-lg px-4 py-2">
             <button
-              onClick={() => setAmount((a) => Math.max(1, a - 1))} // Decrease amount, minimum is 1
+              onClick={() => setAmount((a) => Math.max(1, a - 1))}
               className="p-1"
             >
               <Minus className="h-5 w-5" />
             </button>
             <span className="font-medium">{amount}</span>
             <button
-              onClick={() => setAmount((a) => Math.min(donation.amount, a + 1))} // Limit to donation.amount
+              onClick={() => setAmount((a) => Math.min(donation.amount, a + 1))}
               className="p-1"
             >
               <Plus className="h-5 w-5" />
@@ -202,10 +222,12 @@ export default function DonationDetails() {
             <MessageCircle className="h-6 w-6" />
           </button>
           <button className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile")}>
-            <User className="h-6 w-6" />
+            <UserIcon className="h-6 w-6" />
           </button>
         </div>
       </footer>
     </div>
   );
-}
+};
+
+export default DonationDetails;

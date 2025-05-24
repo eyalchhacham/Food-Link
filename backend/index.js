@@ -627,8 +627,16 @@ app.post("/api/claim-donation/:id", async (req, res) => {
       where: { id: parseInt(id) },
       data: {
         amount: newAmount,
-        claimed_by: userId,
-        status: newAmount === 0 ? "claimed" : "available", // <-- This line does what you want
+        status: newAmount === 0 ? "claimed" : "available",
+      },
+    });
+
+    // Add a row to DonationClaims
+    await prisma.donationClaims.create({
+      data: {
+        donationId: parseInt(id),
+        claimedById: parseInt(userId),
+        ownerId: donation.userId,
       },
     });
 
@@ -645,6 +653,5 @@ app.post("/api/claim-donation/:id", async (req, res) => {
     console.error("Error claiming donation:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-
 });
 
