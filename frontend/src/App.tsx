@@ -11,6 +11,7 @@ import DonationDetails from "./pages/DonationDetails";
 import LocationSetup from "./pages/LocationSetup"; 
 import { GoogleOAuthProvider } from "@react-oauth/google"; // צריך להתקין npm install @react-oauth/google
 import ChatPage from "./pages/ChatPage";
+import UserChatsPage from "./pages/UserChatsPage";
 
 export type User = {
   id: string;
@@ -18,7 +19,7 @@ export type User = {
   name: string;
   phoneNumber: string;
   image_url: string;
-  
+  credit: number;
 };
 
 export interface Donation {
@@ -77,6 +78,7 @@ function App() {
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/chat/:id" element={<ChatPage />} />
         <Route path="/upload-food" element={<UploadFood user={user} />} />
+       <Route path="/user-chats" element={<UserChatsPage user={user} />} />
         <Route
           path="/my-profile"
           element={

@@ -525,7 +525,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
           </div>
           <button
             className="p-2 text-gray-600 hover:text-[#6B9F9F] ml-8"
-            onClick={() => navigate("/messages")}
+            onClick={() => navigate("/user-chats")}
           >
             <MessageCircle className="h-6 w-6" />
           </button>
