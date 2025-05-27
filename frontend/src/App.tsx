@@ -32,6 +32,9 @@ export interface Donation {
   pickupDate?: string;       
   pickupHours?: string;      
   description?: string;
+  expirationDate?: string; 
+  status?: string;         
+  dietary_notes?: string | null;
 }
 
 function App() {

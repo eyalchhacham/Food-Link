@@ -32,6 +32,7 @@ interface Donation {
   category: string;
   latitude?: number;
   longitude?: number;
+  status?: string; 
 }
 
 interface UserLocation {
@@ -217,7 +218,11 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
       const res = await fetch("http://localhost:3000/food-donations");
       const items = await res.json();
 
-      const sortedItems = items.sort((a: Donation, b: Donation) => {
+      const availableItems = items.filter(
+      (donation: Donation) => donation.status === "available"
+     );
+
+      const sortedItems = availableItems.sort((a: Donation, b: Donation) => {
         if (!userLocation?.latitude || !userLocation?.longitude) return 0;
         if (!a.latitude || !a.longitude || !b.latitude || !b.longitude) return 0;
 
@@ -413,16 +418,16 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
                         onChange={(e) => setAddress(e.target.value)}
                         className="w-full p-3 rounded-lg border-2 border-[#D6D1C8] bg-white text-[#5F9C9C] placeholder-[#5F9C9C] shadow-none focus:outline-none focus:ring-0"
                       />
-                      <Button
-                        size="sm"
+                      <button
+                        type="button"
                         onClick={async () => {
                           await handleAddressSubmit();
                           setIsPopoverOpen(false);
                         }}
-                        className="bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] w-full"
+                        className="w-full py-2 rounded-lg font-semibold text-base bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] transition"
                       >
                         Save Location
-                      </Button>
+                      </button>
                     </div>
                   </PopoverContent>
                 </Popover>
