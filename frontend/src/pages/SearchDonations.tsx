@@ -9,7 +9,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "../components/ui/popover";
 
 const categories = [
@@ -30,6 +29,7 @@ export default function SearchDonation({ user }: SearchDonationProps) {
   const [userLocation, setUserLocation] = useState<string>("Getting location...");
   const [addressInput, setAddressInput] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [aiMode, setAiMode] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const navigate = useNavigate();
 
@@ -101,7 +101,7 @@ export default function SearchDonation({ user }: SearchDonationProps) {
     }
   }
 
-  const goToSearchResults = (query: string) => {
+  const goToSearchResults = (query: string, useAI: boolean = false) => {
     if (!coords || !query) return;
     navigate("/search-results", {
       state: {
@@ -109,6 +109,7 @@ export default function SearchDonation({ user }: SearchDonationProps) {
         userLocation,
         coords,
         user,
+        isAI: useAI,
       },
     });
   };
@@ -118,7 +119,7 @@ export default function SearchDonation({ user }: SearchDonationProps) {
       if (prev.toLowerCase().includes(category.toLowerCase())) return prev;
       return prev.length > 0 ? `${prev} ${category}` : category;
     });
-    goToSearchResults(category);
+    goToSearchResults(category, false);
   };
 
   if (!user) {
@@ -129,25 +130,64 @@ export default function SearchDonation({ user }: SearchDonationProps) {
     <div className="max-w-[430px] mx-auto min-h-screen bg-white">
       <div className="p-4">
 
-        {/* Search bar */}
+        {/* Search bar + AI button - Separated */}
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex-1">
-            <div className="w-full bg-gray-100 px-4 py-2 rounded-full min-h-[40px] flex items-center">
-              <input
-                type="text"
-                className="w-full bg-transparent focus:outline-none text-sm text-gray-700 placeholder:text-gray-400 transition-opacity duration-300 ease-in"
-                placeholder="Search food and items"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && searchQuery.trim()) {
-                    goToSearchResults(searchQuery.trim());
-                  }
-                }}
-              />
-            </div>
-          </div>
-        </div>
+  {/* Search bar */}
+  <input
+    type="text"
+    className="flex-1 bg-gray-100 px-4 py-2 rounded-full min-h-[40px] text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
+    placeholder={aiMode ? "Ask anything with AI..." : "Search food and items"}
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" && searchQuery.trim()) {
+        goToSearchResults(searchQuery.trim(), aiMode); // aiMode true=AI, false=regular
+      }
+    }}
+  />
+
+  {/*  AI Toggle Button */}
+  <button
+    onClick={() => setAiMode(!aiMode)}
+    className={`flex flex-col items-center justify-center rounded-full w-12 h-12 shadow-md transition text-xs
+      ${aiMode
+        ? "bg-[#D6D2C4]"       // Cream background when AI is active
+        : "bg-[#6B9F9F] hover:bg-[#548686]"} // Teal background when normal
+    `}
+    title="Toggle AI Mode"
+    type="button"
+    style={{
+      color: aiMode ? '#5F9C9C' : 'white', // Teal text on cream, white on teal
+    }}
+  >
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={`w-9 h-8`}
+      style={{ color: aiMode ? '#5F9C9C' : 'white' }}
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <rect x="5" y="8" width="14" height="9" rx="4" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+      <circle cx="8.5" cy="12.5" r="1" fill="currentColor"/>
+      <circle cx="15.5" cy="12.5" r="1" fill="currentColor"/>
+      <rect x="10" y="15" width="4" height="1" rx="0.5" fill="currentColor"/>
+      <rect x="11.25" y="4" width="1.5" height="4" rx="0.75" fill="currentColor"/>
+      <rect x="3" y="13" width="2" height="1.5" rx="0.75" fill="currentColor"/>
+      <rect x="19" y="13" width="2" height="1.5" rx="0.75" fill="currentColor"/>
+    </svg>
+    <span
+      className="leading-tight"
+      style={{
+        marginTop: '-8px',
+        fontSize: '10px',
+        color: aiMode ? '#5F9C9C' : 'white'
+      }}
+    >
+      Ask AI
+    </span>
+  </button>
+</div>
 
         {/* Location line */}
         <div className="flex items-center gap-2 mb-6 text-sm">
@@ -174,13 +214,12 @@ export default function SearchDonation({ user }: SearchDonationProps) {
                   onChange={(e) => setAddressInput(e.target.value)}
                   className="w-full p-3 rounded-lg border-2 border-[#D6D1C8] bg-white text-[#5F9C9C] placeholder-[#5F9C9C] shadow-none focus:outline-none focus:ring-0"
                 />
-                <Button
-                  size="sm"
+                <button
+                  type="button"
                   onClick={handleAddressSubmit}
-                  className="bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] w-full"
-                >
+                  className="w-full py-2 rounded-lg font-semibold text-base bg-[#D6D2C4] text-[#5F9C9C] hover:bg-[#c9c5b8] transition"                >
                   Save Location
-                </Button>
+                </button>
               </div>
             </PopoverContent>
           </Popover>

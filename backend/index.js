@@ -1,11 +1,12 @@
 //נועה התקינה npm install google-auth-library
+require("dotenv").config();
 const express = require("express");
+const aiRouter = require('./routes/ai');
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
-require("dotenv").config();
 const app = express();
 const prisma = new PrismaClient();
 const { Storage } = require("@google-cloud/storage");
@@ -19,6 +20,7 @@ const { loginWithGoogle } = require("./Services/googleLoginService"); //  google
 
 app.use(express.json());
 app.use(cors());
+app.use('/api/ai', aiRouter);
 
 // Configure multer for file uploads
 const upload = multer({
