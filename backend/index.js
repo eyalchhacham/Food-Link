@@ -523,7 +523,7 @@ app.get("/user-chats/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // שלב 1: הודעות קיימות
+    // שלב 1: צ'אטים קיימים (על פי הודעות)
     const messages = await prisma.message.findMany({
       where: {
         OR: [
@@ -538,13 +538,15 @@ app.get("/user-chats/:userId", async (req, res) => {
       },
     });
 
+    console.log("MESSAGES FROM DB:", messages);
+
+    // Map: key=donationId-otherUserId, value=ChatPreview
     const chatMap = new Map();
 
     messages.forEach((msg) => {
-      const otherUser =
-        msg.from_user_id === parseInt(userId) ? msg.to_user : msg.from_user;
+      // המשתמש השני תמיד זה מי שאינו המשתמש הנוכחי
+      const otherUser = msg.from_user_id === parseInt(userId) ? msg.to_user : msg.from_user;
       const key = `${msg.donation_id}-${otherUser.id}`;
-
       if (!chatMap.has(key)) {
         chatMap.set(key, {
           donationId: msg.donation_id,
@@ -557,43 +559,45 @@ app.get("/user-chats/:userId", async (req, res) => {
       }
     });
 
-    // שלב 2: תרומות שנעשו עליהן Claim ועדיין אין צ'אט
-    const claimedDonations = await prisma.foodDonation.findMany({
-      where: {
-        claimed_by: parseInt(userId),
-      },
+    console.log("CHAT MAP:", Array.from(chatMap.entries()));
+
+    // Claims (רק אם רוצים גם את אלה שעשו claim)
+    const claims = await prisma.donationClaims.findMany({
+      where: { claimedById: parseInt(userId) },
       include: {
-        user: true, // בעל התרומה
+        donation: {
+          include: { user: true }, // בעל התרומה
+        },
       },
     });
 
-    claimedDonations.forEach((donation) => {
-      const key = `${donation.id}-${donation.user.id}`;
-
-      // רק אם עדיין אין צ'אט קיים על התרומה הזאת
+    claims.forEach((claim) => {
+      const key = `${claim.donationId}-${claim.ownerId}`;
       if (!chatMap.has(key)) {
         chatMap.set(key, {
-          donationId: donation.id,
-          otherUserId: donation.user.id,
-          otherUserName: donation.user.name,
-          otherUserImage: donation.user.image_url,
+          donationId: claim.donationId,
+          otherUserId: claim.ownerId,
+          otherUserName: claim.donation.user.name,
+          otherUserImage: claim.donation.user.image_url,
           lastMessage: "You claimed this donation. Start a conversation!",
-          lastMessageTime: donation.updatedAt || donation.createdAt,
+          lastMessageTime: claim.createdAt || claim.updatedAt || new Date(),
         });
       }
     });
 
-    // הפוך למערך ומיין לפי זמן
     const chatArray = Array.from(chatMap.values()).sort(
       (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
     );
 
+      
     res.json(chatArray);
   } catch (error) {
     console.error("Error fetching user chats:", error);
     res.status(500).json({ error: "Failed to load chats" });
   }
 });
+
+
 
 
 

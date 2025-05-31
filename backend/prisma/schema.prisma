@@ -20,7 +20,8 @@ model User {
   FoodDonation FoodDonation[]
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
-
+  claimedDonations DonationClaims[] @relation("ClaimedDonations")
+  ownedClaims      DonationClaims[] @relation("OwnedClaims")
 }
 
 model UserLocation {
@@ -56,6 +57,7 @@ model FoodDonation {
 
   @@map("food_donations")
   messages Message[]
+  claims DonationClaims[]
 }
 
   model DonationClaims {
@@ -64,6 +66,12 @@ model FoodDonation {
   claimedById  Int          // The user who claimed the donation
   ownerId      Int          // The user who created the donation
 
+  donation     FoodDonation @relation(fields: [donationId], references: [id])
+  claimer      User         @relation("ClaimedDonations", fields: [claimedById], references: [id])
+  owner        User         @relation("OwnedClaims", fields: [ownerId], references: [id])
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
  }
 
 enum Unit {
