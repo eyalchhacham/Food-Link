@@ -9,7 +9,7 @@ import {
   MessageCircle,
   User,
 } from "lucide-react";
-
+//hihihihihihihi
 type ChatPreview = {
   donationId: number;
   otherUserId: number;
@@ -42,6 +42,9 @@ export default function UserChatsPage({ user }: Props) {
         const res = await axios.get(
           `http://localhost:3000/user-chats/${user.id}`
         );
+
+          console.log("Chats returned from backend:", res.data);
+
         setChats(res.data);
       } catch (err) {
         console.error("Error fetching chats:", err);
@@ -143,9 +146,7 @@ export default function UserChatsPage({ user }: Props) {
             <MessageCircle className="h-6 w-6" />
           </button>
           <button
-            className="p-2 text-gray-600 hover:text-[#6B9F9F]"
-            onClick={() => navigate("/my-profile", { state: { user } })}
-          >
+            className="p-2 text-gray-600 hover:text-[#6B9F9F]" onClick={() => navigate("/my-profile", { state: { user } })}>
             <User className="h-6 w-6" />
           </button>
         </div>
