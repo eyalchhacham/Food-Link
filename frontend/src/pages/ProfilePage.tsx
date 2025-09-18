@@ -24,9 +24,9 @@ export function ProfilePage({ setUser }: { setUser: (user: User) => void }) {
 
   useEffect(() => {
   if (user) {
-    handleSaveChanges(); // קורא לפונקציה מיד אחרי שהנתונים נטענים
+    handleSaveChanges(); 
   }
-}, [user]); // תלות ב-user כדי לבצע עדכון אחרי טעינת המשתמש
+}, [user]); 
 
   // Fetch user data if not available in location.state
   useEffect(() => {

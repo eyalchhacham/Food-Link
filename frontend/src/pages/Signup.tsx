@@ -53,7 +53,14 @@ export default function Signup({ setUser }: { setUser: (user: User) => void }) {
       if (!response.ok) {
        throw new Error(data.message || "Registration failed");
      }
-      setUser({ email, name, phoneNumber, id: data.id });
+      setUser({
+        email,
+        name,
+        phoneNumber,
+        id: data.id,
+        image_url: data.image_url || "",
+        credit: data.credit ?? 0,
+      });
       localStorage.setItem("userId", data.id.toString());
       navigate("/home");
     } catch (err) {

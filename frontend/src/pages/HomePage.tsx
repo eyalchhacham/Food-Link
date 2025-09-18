@@ -84,23 +84,23 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
 }, [user?.id]);
 
 
-  // 1. שליפת מיקום ראשונית
+  
   useEffect(() => {
     if (user?.id) {
-      fetchUserLocation(parseInt(user.id)); // נשלח בקשה לשרת להביא מיקום
+      fetchUserLocation(parseInt(user.id)); 
     } else {
-      initializeLocation(); // רק אם אין יוזר, ננסה מהמכשיר
+      initializeLocation(); 
     }
   }, []);
 
-  // 2. טעינת תרומות אחרי שיש מיקום
+ 
   useEffect(() => {
     if (userLocation) {
       loadDonations();
     }
   }, [userLocation]);
 
-  // 3. הפניה להגדרת מיקום אם אין מיקום למשתמש
+
   useEffect(() => {
     if (
       user &&
@@ -108,7 +108,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
         userLocation.latitude == null ||
         userLocation.longitude == null)
     ) {
-      // מחכים רגע לראות אם ייקבע מיקום, אחרת מפנים
+     
       const timeout = setTimeout(() => {
         navigate("/location-setup");
       }, 1500);
@@ -123,7 +123,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
     try {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log("Location retrieved:", position.coords); // 🛠️ נוסיף לראות בקונסול
+          console.log("Location retrieved:", position.coords); 
           setUserLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -131,7 +131,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
           });
         },
         (error) => {
-          console.error("Error getting location:", error); // 🛠️ נדפיס שגיאה אם יש
+          console.error("Error getting location:", error); 
           setShowLocationAlert(true);
           setUserLocation({
             name: "Location unavailable",
@@ -142,11 +142,11 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
         {
           timeout: 10000,
           maximumAge: 60000,
-          enableHighAccuracy: true, // 🛠️ נוסיף כדי לנסות מיקום מדויק יותר
+          enableHighAccuracy: true, 
         }
       );
     } catch (error) {
-      console.error("Exception getting location:", error); // 🛠️ גם כאן לטפל בשגיאה חריגה
+      console.error("Exception getting location:", error);
       setShowLocationAlert(true);
       setUserLocation({
         name: "Location unavailable",
@@ -226,7 +226,7 @@ export default function HomePage({ user, onLogout }: HomePageProps) {
         if (!userLocation?.latitude || !userLocation?.longitude) return 0;
         if (!a.latitude || !a.longitude || !b.latitude || !b.longitude) return 0;
 
-        const R = 6371; // רדיוס כדור הארץ בקילומטרים
+        const R = 6371; // Earth's radius in km
         const dLatA = ((a.latitude - userLocation.latitude) * Math.PI) / 180;
         const dLonA = ((a.longitude - userLocation.longitude) * Math.PI) / 180;
         const dLatB = ((b.latitude - userLocation.latitude) * Math.PI) / 180;

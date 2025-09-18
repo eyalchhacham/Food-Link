@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google"; // צריך להתקין npm install @react-oauth/google
+import { useGoogleLogin } from "@react-oauth/google"; 
 import { User } from "../App";
 import logo from "../logo.png";
 
@@ -41,7 +41,7 @@ export default function Login({ setUser }: { setUser: (user: User) => void }) {
     }
   };
 
-  // התחברות עם גוגל
+ 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {

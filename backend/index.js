@@ -1,4 +1,4 @@
-//נועה התקינה npm install google-auth-library
+
 require("dotenv").config();
 const express = require("express");
 const aiRouter = require('./routes/ai');
@@ -298,7 +298,7 @@ app.get("/food-donations/:id", async (req, res) => {
     // If coordinates are available, fetch the full address
     if (donation.latitude && donation.longitude) {
       try {
-        const apiKey = process.env.GOOGLE_GEO_LOCATION; // משתנה סביבה שהגדרת
+        const apiKey = process.env.GOOGLE_GEO_LOCATION; 
         const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${donation.latitude},${donation.longitude}&key=${apiKey}`;
         const response = await fetch(url);
         const data = await response.json();
@@ -353,13 +353,13 @@ app.post("/user-location", async (req, res) => {
   const { userId, latitude, longitude, address } = req.body;
 
   try {
-    // קודם לבדוק אם כבר יש מיקום קיים למשתמש
+    
     const existingLocation = await prisma.UserLocation.findFirst({
       where: { user_id: parseInt(userId) },
     });
 
     if (existingLocation) {
-      // אם יש מיקום ➔ נעדכן אותו
+  
       const updatedLocation = await prisma.UserLocation.update({
         where: { id: existingLocation.id },
         data: {
@@ -370,7 +370,7 @@ app.post("/user-location", async (req, res) => {
       });
       res.status(200).json(updatedLocation);
     } else {
-      // אם אין מיקום ➔ ניצור חדש
+      
       const newLocation = await prisma.UserLocation.create({
         data: {
           user_id: parseInt(userId),
@@ -523,7 +523,7 @@ app.get("/user-chats/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // שלב 1: צ'אטים קיימים (על פי הודעות)
+  
     const messages = await prisma.message.findMany({
       where: {
         OR: [
@@ -544,7 +544,7 @@ app.get("/user-chats/:userId", async (req, res) => {
     const chatMap = new Map();
 
     messages.forEach((msg) => {
-      // המשתמש השני תמיד זה מי שאינו המשתמש הנוכחי
+      
       const otherUser = msg.from_user_id === parseInt(userId) ? msg.to_user : msg.from_user;
       const key = `${msg.donation_id}-${otherUser.id}`;
       if (!chatMap.has(key)) {
@@ -561,12 +561,12 @@ app.get("/user-chats/:userId", async (req, res) => {
 
     console.log("CHAT MAP:", Array.from(chatMap.entries()));
 
-    // Claims (רק אם רוצים גם את אלה שעשו claim)
+    
     const claims = await prisma.donationClaims.findMany({
       where: { claimedById: parseInt(userId) },
       include: {
         donation: {
-          include: { user: true }, // בעל התרומה
+          include: { user: true }, 
         },
       },
     });
